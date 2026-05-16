@@ -1,0 +1,98 @@
+#pragma code_page(65001)
+
+#include <Windows.h>
+#include "resource.h"
+
+IDI_APP_ICON ICON "../ico图标/1.ico"
+
+// Spin control constants (from CommCtrl.h)
+#define UDS_SETBUDDYINT 0x0002
+#define UDS_AUTOBUDDY   0x0010
+#define UDS_ALIGNRIGHT  0x0004
+#define UDS_ARROWKEYS   0x0020
+
+IDD_MAIN_DIALOG DIALOGEX 0, 0, 430, 420
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+CAPTION "Mouse Focus — 设置"
+FONT 9, "Segoe UI"
+{
+    GROUPBOX        "核心行为", IDC_STATIC, 10, 8, 410, 130
+
+    CONTROL         "仅 Alt+Tab 切换", IDC_RADIO_ALT_TAB, "Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,
+                    22, 24, 130, 14
+    CONTROL         "任意窗口聚焦变化", IDC_RADIO_ANY, "Button",
+                    BS_AUTORADIOBUTTON | WS_TABSTOP,
+                    170, 24, 150, 14
+
+    CONTROL         "瞬间移动", IDC_RADIO_INSTANT, "Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,
+                    22, 48, 80, 14
+    CONTROL         "平滑动画", IDC_RADIO_SMOOTH, "Button",
+                    BS_AUTORADIOBUTTON | WS_TABSTOP,
+                    110, 48, 80, 14
+
+    LTEXT           "动画时长:", IDC_STATIC, 200, 50, 50, 12
+    EDITTEXT        IDC_EDIT_DURATION, 250, 48, 44, 14, ES_NUMBER | WS_TABSTOP
+    CONTROL         "", IDC_SPIN_DURATION, "msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ALIGNRIGHT | UDS_ARROWKEYS,
+                    0, 0, 0, 0
+    LTEXT           "ms (50-600)", IDC_STATIC, 300, 50, 80, 12
+
+    LTEXT           "窗口恢复延迟:", IDC_STATIC, 200, 72, 70, 12
+    EDITTEXT        IDC_EDIT_DELAY, 270, 70, 40, 14, ES_NUMBER | WS_TABSTOP
+    CONTROL         "", IDC_SPIN_DELAY, "msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ALIGNRIGHT | UDS_ARROWKEYS,
+                    0, 0, 0, 0
+    LTEXT           "ms (0-2000)", IDC_STATIC, 315, 72, 80, 12
+
+    CONTROL         "窗口中心（含标题栏）", IDC_RADIO_WINDOW, "Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,
+                    22, 94, 160, 14
+    CONTROL         "客户区中心", IDC_RADIO_CLIENT, "Button",
+                    BS_AUTORADIOBUTTON | WS_TABSTOP,
+                    190, 94, 80, 14
+
+    CONTROL         "启用服务", IDC_CHECK_ENABLED, "Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,
+                    22, 114, 80, 14
+
+    GROUPBOX        "排除规则", IDC_STATIC, 10, 148, 410, 100
+
+    LTEXT           "进程名列表（如 devenv.exe）：", IDC_STATIC, 22, 164, 200, 12
+    LISTBOX         IDC_LIST_EXCLUDE, 22, 178, 280, 54,
+                    LBS_NOTIFY | WS_VSCROLL | WS_BORDER | WS_TABSTOP
+    PUSHBUTTON      "添加", IDC_BTN_ADD, 310, 178, 50, 15
+    PUSHBUTTON      "移除", IDC_BTN_REMOVE, 310, 198, 50, 15
+
+    GROUPBOX        "守护进程状态", IDC_STATIC, 10, 256, 410, 50
+
+    LTEXT           "状态:", IDC_STATIC, 22, 276, 30, 12
+    LTEXT           "未知", IDC_STATUS, 55, 276, 100, 12
+    PUSHBUTTON      "启动", IDC_BTN_START, 180, 272, 50, 15
+    PUSHBUTTON      "停止", IDC_BTN_STOP, 238, 272, 50, 15
+    CONTROL         "开机自启", IDC_CHECK_AUTOSTART, "Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,
+                    310, 274, 80, 14
+
+    GROUPBOX        "日志", IDC_STATIC, 10, 314, 410, 42
+
+    LTEXT           "日志级别:", IDC_STATIC, 22, 332, 50, 12
+    COMBOBOX        IDC_COMBO_LOG, 72, 330, 80, 80,
+                    CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+
+    DEFPUSHBUTTON   "保存设置", IDOK, 200, 385, 70, 22
+    PUSHBUTTON      "关闭", IDCANCEL, 280, 385, 70, 22
+}
+
+IDD_INPUT_DIALOG DIALOGEX 0, 0, 280, 70
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "添加排除进程"
+FONT 9, "Segoe UI"
+{
+    LTEXT           "请输入进程名（如 devenv.exe）：", IDC_STATIC, 12, 10, 250, 12
+    EDITTEXT        IDC_INPUT_TEXT, 12, 24, 256, 14, ES_AUTOHSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "确定", IDOK, 120, 46, 60, 15
+    PUSHBUTTON      "取消", IDCANCEL, 190, 46, 60, 15
+}

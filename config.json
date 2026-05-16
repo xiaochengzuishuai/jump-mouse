@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "triggerMode": "alt_tab_only",
+  "mouseMode": "instant",
+  "smoothDurationMs": 150,
+  "moveDelayMs": 0,
+  "enabled": true,
+  "targetArea": "window_rect",
+  "excludedProcesses": [],
+  "excludedClasses": [],
+  "logLevel": "none",
+  "logFile": ""
+}

@@ -1,0 +1,2 @@
+#include <Windows.h>
+IDI_APP_ICON ICON "../ico图标/exe.ico"
