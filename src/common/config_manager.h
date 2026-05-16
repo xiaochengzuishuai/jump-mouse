@@ -11,7 +11,10 @@ struct AppConfig {
     int smoothDurationMs = 600;
     int moveDelayMs = 100;
     bool highlightEnabled = false;
+    std::string highlightShape = "circle";
+    int highlightColor = 0x0000FFFF;  // COLORREF: RGB(255,255,0)=yellow
     int highlightSize = 48;
+    std::string highlightCustomFile;
     bool enabled = true;
     std::string targetArea = "window_rect";
     std::vector<std::string> excludedProcesses;

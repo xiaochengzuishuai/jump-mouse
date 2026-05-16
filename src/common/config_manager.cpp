@@ -40,9 +40,12 @@ bool ConfigManager::load(const std::wstring& path) {
         cfg.mouseMode        = root.has("mouseMode") ? root["mouseMode"].asString("smooth") : "smooth";
         cfg.smoothDurationMs = root.has("smoothDurationMs") ? root["smoothDurationMs"].asInt(600) : 600;
         cfg.moveDelayMs      = root.has("moveDelayMs") ? root["moveDelayMs"].asInt(100) : 100;
-        cfg.highlightEnabled = root.has("highlightEnabled") ? root["highlightEnabled"].asBool(false) : false;
-        cfg.highlightSize    = root.has("highlightSize") ? root["highlightSize"].asInt(48) : 48;
-        cfg.enabled          = root.has("enabled") ? root["enabled"].asBool(true) : true;
+        cfg.highlightEnabled    = root.has("highlightEnabled") ? root["highlightEnabled"].asBool(false) : false;
+        cfg.highlightShape     = root.has("highlightShape") ? root["highlightShape"].asString("circle") : "circle";
+        cfg.highlightColor     = root.has("highlightColor") ? root["highlightColor"].asInt(0x0000FFFF) : 0x0000FFFF;
+        cfg.highlightSize      = root.has("highlightSize") ? root["highlightSize"].asInt(48) : 48;
+        cfg.highlightCustomFile = root.has("highlightCustomFile") ? root["highlightCustomFile"].asString("") : "";
+        cfg.enabled            = root.has("enabled") ? root["enabled"].asBool(true) : true;
         cfg.targetArea       = root.has("targetArea") ? root["targetArea"].asString("window_rect") : "window_rect";
         cfg.logLevel         = root.has("logLevel") ? root["logLevel"].asString("none") : "none";
         cfg.logFile          = root.has("logFile") ? root["logFile"].asString("") : "";
@@ -67,6 +70,10 @@ bool ConfigManager::load(const std::wstring& path) {
         if (cfg.moveDelayMs > 2000) cfg.moveDelayMs = 2000;
         if (cfg.highlightSize < 24) cfg.highlightSize = 24;
         if (cfg.highlightSize > 128) cfg.highlightSize = 128;
+        if (cfg.highlightShape != "circle" && cfg.highlightShape != "square"
+         && cfg.highlightShape != "diamond" && cfg.highlightShape != "arrow"
+         && cfg.highlightShape != "cross" && cfg.highlightShape != "custom")
+            cfg.highlightShape = "circle";
         if (cfg.targetArea != "window_rect" && cfg.targetArea != "client_rect")
             cfg.targetArea = "window_rect";
 
@@ -88,9 +95,12 @@ bool ConfigManager::save(const std::wstring& path) const {
         root["mouseMode"]        = JsonValue::makeString(m_cfg.mouseMode);
         root["smoothDurationMs"] = JsonValue::makeInt(m_cfg.smoothDurationMs);
         root["moveDelayMs"]      = JsonValue::makeInt(m_cfg.moveDelayMs);
-        root["highlightEnabled"] = JsonValue::makeBool(m_cfg.highlightEnabled);
-        root["highlightSize"]    = JsonValue::makeInt(m_cfg.highlightSize);
-        root["enabled"]          = JsonValue::makeBool(m_cfg.enabled);
+        root["highlightEnabled"]    = JsonValue::makeBool(m_cfg.highlightEnabled);
+        root["highlightShape"]     = JsonValue::makeString(m_cfg.highlightShape);
+        root["highlightColor"]     = JsonValue::makeInt(m_cfg.highlightColor);
+        root["highlightSize"]      = JsonValue::makeInt(m_cfg.highlightSize);
+        root["highlightCustomFile"] = JsonValue::makeString(m_cfg.highlightCustomFile);
+        root["enabled"]            = JsonValue::makeBool(m_cfg.enabled);
         root["targetArea"]       = JsonValue::makeString(m_cfg.targetArea);
         root["logLevel"]         = JsonValue::makeString(m_cfg.logLevel);
         root["logFile"]          = JsonValue::makeString(m_cfg.logFile);

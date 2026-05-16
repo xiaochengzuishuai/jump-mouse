@@ -28,24 +28,32 @@
 | 版本 | 日期 | 变更 |
 |------|------|------|
 | v1.0 | 2026-05-16 | 初始版本：守护进程 + GUI 配置工具 |
-| v1.1 | 2026-05-17 | 窗口恢复延迟、保存不关闭窗口、系统托盘、exe 图标、光标放大+变黄高亮 |
+| v1.1 | 2026-05-17 | 窗口恢复延迟、保存不关闭窗口、系统托盘、exe 图标 |
+| v1.2 | 2026-05-17 | 移动后临时变更：自定义形状/颜色/文件，双画布预览，实时刷新 |
 
 ---
 
 ## 已完成功能
 
-### F-1：鼠标到达后临时放大为黄色 ✅ 已实现 (v1.1)
+### F-1：移动后临时变更 ✅ 已实现 (v1.2)
 
-**行为**：鼠标移动到目标位置后，光标临时变为黄色圆形高亮光标。检测到鼠标位移（>2px）后自动恢复原始光标。
+**行为**：鼠标到达目标窗口中心后，光标临时变更为用户自定义的样式（形状/颜色/文件）。检测到鼠标位移（>2px）后自动恢复原始光标。
 
-**实现**：
-- 移动前通过 `CopyImage` 保存原始箭头光标
-- 到达目标后用 `CreateCursor` 创建黄色圆形光标（大小可配置 24-128px）
-- 通过 `SetSystemCursor` 全局替换光标为黄色
-- 50ms 定时器轮询鼠标位置，检测到位移后通过 `CopyCursor` + `SetSystemCursor` 恢复原始光标
-- 若 `SetSystemCursor` 失败（权限不足），自动跳过
+**GUI 新增**：
+- "移动后临时变更"设置组，包含启用开关
+- 双画布预览：左侧实时显示当前系统光标，右侧实时预览变更后的光标
+- 形状下拉：圆形、方形、菱形、箭头、十字、自定义文件
+- 颜色下拉：黄色、红色、绿色、蓝色、洋红、青色、白色
+- 大小：24-128px 可调
+- 浏览自定义光标文件（.cur），自动匹配大小
 
-**配置项**：`highlightEnabled`（开关）、`highlightSize`（光标像素大小 24-128）
+**实现细节**：
+- 光标生成：`CreateDIBSection` 32-bit BGRA DIB + `CreateIconIndirect`（支持多形状）
+- 预览画布：`SS_OWNERDRAW` + `WM_DRAWITEM` + `DrawIconEx`
+- 实时刷新：形状/颜色/大小变更时 `InvalidateRect` 触发热重绘
+- 光标替换：`CopyImage` 保存原始 → `SetSystemCursor` 全局替换 → 轮询恢复
+
+**配置项**：`highlightEnabled`、`highlightShape`（circle/square/diamond/arrow/cross/custom）、`highlightColor`（BGR 值）、`highlightSize`（24-128）、`highlightCustomFile`
 
 ---
 

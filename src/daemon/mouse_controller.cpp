@@ -61,15 +61,21 @@ void MouseController::setBit(std::vector<BYTE>& plane, int stride, int x, int y,
     else    plane[off] &= ~(1U << bit);
 }
 
-HCURSOR MouseController::createColorCursor(int size) {
-    int r = size / 2;
-    int r2 = r * r;
+static bool shapeHit(const std::string& shape, int x, int y, int r) {
+    int dx = x - r, dy = y - r;
+    if (shape == "circle")  return dx*dx + dy*dy <= r*r;
+    if (shape == "square")  return abs(dx) <= r && abs(dy) <= r;
+    if (shape == "diamond") return abs(dx) + abs(dy) <= r;
+    if (shape == "arrow")   return dx >= 0 && dy >= 0 && dy <= r - dx; // top-left triangle
+    if (shape == "cross")   return (abs(dx) <= r/3 || abs(dy) <= r/3) && abs(dx) <= r && abs(dy) <= r;
+    return false;
+}
 
-    // AND mask: monochrome, word-aligned
+HCURSOR MouseController::createColorCursor(int size, const std::string& shape, COLORREF rgb) {
+    int r = size / 2;
     int andStride = ((size + 15) / 16) * 2;
     std::vector<BYTE> andBits(andStride * size, 0xFF);
 
-    // Color: 32-bit BGRA top-down DIB
     BITMAPINFO bmi = {};
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     bmi.bmiHeader.biWidth = size;
@@ -83,40 +89,33 @@ HCURSOR MouseController::createColorCursor(int size) {
     HBITMAP hbmColor = CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS,
         reinterpret_cast<void**>(&pColor), nullptr, 0);
     ReleaseDC(nullptr, hdc);
-
-    if (!hbmColor || !pColor) {
-        if (hbmColor) DeleteObject(hbmColor);
-        return nullptr;
-    }
+    if (!hbmColor || !pColor) { if (hbmColor) DeleteObject(hbmColor); return nullptr; }
 
     int rowBytes = size * 4;
     for (int y = 0; y < size; ++y) {
         for (int x = 0; x < size; ++x) {
-            int dx = x - r, dy = y - r;
-            if (dx * dx + dy * dy <= r2) {
+            if (shapeHit(shape, x, y, r)) {
                 setBit(andBits, andStride, x, y, false);
                 int off = y * rowBytes + x * 4;
-                pColor[off + 0] = 0x00; // B
-                pColor[off + 1] = 0xFF; // G
-                pColor[off + 2] = 0xFF; // R
-                pColor[off + 3] = 0x00; // A
+                pColor[off + 0] = GetBValue(rgb);   // B
+                pColor[off + 1] = GetGValue(rgb);   // G
+                pColor[off + 2] = GetRValue(rgb);   // R
+                pColor[off + 3] = 0x00;
             }
         }
     }
 
     HBITMAP hbmMask = CreateBitmap(size, size, 1, 1, andBits.data());
-
     ICONINFO ii = {};
-    ii.fIcon = FALSE;
-    ii.xHotspot = r;
-    ii.yHotspot = r;
-    ii.hbmMask = hbmMask;
-    ii.hbmColor = hbmColor;
-
+    ii.fIcon = FALSE; ii.xHotspot = r; ii.yHotspot = r;
+    ii.hbmMask = hbmMask; ii.hbmColor = hbmColor;
     HCURSOR hCursor = CreateIconIndirect(&ii);
-    DeleteObject(hbmMask);
-    DeleteObject(hbmColor);
+    DeleteObject(hbmMask); DeleteObject(hbmColor);
     return hCursor;
+}
+
+HCURSOR createPreviewCursor(int size, const std::string& shape, COLORREF color) {
+    return MouseController::createColorCursor(size, shape, color);
 }
 
 bool MouseController::applyHighlight() {
@@ -130,11 +129,20 @@ bool MouseController::applyHighlight() {
         return false;
     }
 
-    HCURSOR hNew = createColorCursor(m_highlightSize);
+    // Use custom file if shape is "custom" and file is set
+    HCURSOR hNew = nullptr;
+    if (m_highlightShape == "custom" && !m_highlightCustomFile.empty()) {
+        std::wstring wfile(m_highlightCustomFile.begin(), m_highlightCustomFile.end());
+        hNew = (HCURSOR)LoadImageW(nullptr, wfile.c_str(), IMAGE_CURSOR,
+            m_highlightSize, m_highlightSize, LR_LOADFROMFILE);
+    }
+    if (!hNew) {
+        hNew = createColorCursor(m_highlightSize, m_highlightShape,
+            static_cast<COLORREF>(m_highlightColor));
+    }
     if (!hNew) {
         LOG_DEBUG("  Could not create highlight cursor");
-        DestroyCursor(m_originalCursor);
-        m_originalCursor = nullptr;
+        if (m_originalCursor) { DestroyCursor(m_originalCursor); m_originalCursor = nullptr; }
         return false;
     }
 

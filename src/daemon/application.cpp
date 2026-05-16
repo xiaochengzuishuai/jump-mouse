@@ -117,7 +117,10 @@ void Application::executeMove(HWND target) {
         // Highlight after instant move
         if (cfg.highlightEnabled) {
             m_mouse.enableHighlight(true);
+            m_mouse.setHighlightShape(cfg.highlightShape);
+            m_mouse.setHighlightColor(cfg.highlightColor);
             m_mouse.setHighlightSize(cfg.highlightSize);
+            m_mouse.setHighlightCustomFile(cfg.highlightCustomFile);
             if (m_mouse.applyHighlight())
                 SetTimer(m_hwnd, TIMER_HIGHLIGHT_POLL, 50, nullptr);
         }

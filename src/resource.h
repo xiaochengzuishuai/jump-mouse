@@ -26,6 +26,15 @@
 #define IDC_EDIT_HIGHLIGHT_SIZE 1035
 #define IDC_SPIN_HIGHLIGHT_SIZE 1036
 
+// Highlight canvases
+#define IDC_CANVAS_CURRENT      1040
+#define IDC_CANVAS_PREVIEW      1041
+
+// Highlight shape & color
+#define IDC_COMBO_SHAPE         1050
+#define IDC_COMBO_COLOR         1051
+#define IDC_BTN_BROWSE_CUR      1052
+
 // Radio buttons — target area
 #define IDC_RADIO_WINDOW        1040
 #define IDC_RADIO_CLIENT        1041
