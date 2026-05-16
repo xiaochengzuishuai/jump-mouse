@@ -2,50 +2,96 @@ E:\玩转ai\cc_project\鼠标聚焦脚本>cmake --build build --config Release
 适用于 .NET Framework MSBuild 版本 18.6.3+84d3e95b4
 
   config_dialog.cpp
-E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(70,25): error C2664: “HICON LoadIconW(HINSTANCE,LPCWSTR)”:
-无法将参数 2 从“LPSTR”转换为“LPCWSTR” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
-      E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(70,44):
-      指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
-      E:\Windows Kits\10\Include\10.0.26100.0\um\winuser.h(10749,1):
-      参见“LoadIconW”的声明
-      E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(70,25):
-      尝试匹配参数列表“(nullptr, LPSTR)”时
+E:\VS-ALL\Product\VC\Tools\MSVC\14.51.36231\include\xutility(5094,18): warning C4244: “=”: 从“const wchar_t”转换到“char”，可能
+丢失数据 [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
+  (编译源文件“../src/config_tool/config_dialog.cpp”)
+      E:\VS-ALL\Product\VC\Tools\MSVC\14.51.36231\include\xutility(5094,18):
+      模板实例化上下文(最早的实例化上下文)为
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(136,24):
+          查看对正在编译的函数 模板 实例化“std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<const wch
+  ar_t*,0>(_Iter,_Iter,const _Alloc &)”的引用
+          with
+          [
+              _Iter=const wchar_t *,
+              _Alloc=std::allocator<char>
+          ]
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(135,27):
+              请参阅 "ConfigDialog::updatePreviewCursor" 中对 "std::basic_string<char,std::char_traits<char>,std::allocator<
+  char>>::basic_string" 的第一个引用
+          E:\VS-ALL\Product\VC\Tools\MSVC\14.51.36231\include\xstring(862,17):
+          查看对正在编译的函数 模板 实例化“void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_i
+  ter<const wchar_t*,const wchar_t*,_Size_type>(_Iter,const _Sent,_Size)”的引用
+          with
+          [
+              _Size_type=unsigned __int64,
+              _Iter=const wchar_t *,
+              _Sent=const wchar_t *,
+              _Size=unsigned __int64
+          ]
+          E:\VS-ALL\Product\VC\Tools\MSVC\14.51.36231\include\xstring(1018,18):
+          查看对正在编译的函数 模板 实例化“_OutIt *std::_Copy_n_unchecked4<const wchar_t*,_Size,char*>(_InIt,_SizeTy,_OutIt)”的引用
+          with
+          [
+              _OutIt=char *,
+              _Size=unsigned __int64,
+              _InIt=const wchar_t *,
+              _SizeTy=unsigned __int64
+          ]
 
-E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(485,13): error C2660: “GetMessageW”: 函数不接受 0 个参数 [E:\玩转ai\c
-c_project\鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
-      E:\Windows Kits\10\Include\10.0.26100.0\um\winuser.h(3414,1):
-      参见“GetMessageW”的声明
-      E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(485,13):
-      尝试匹配参数列表“()”时
+E:\VS-ALL\Product\VC\Tools\MSVC\14.51.36231\include\xutility(5094,18): warning C4244: “=”: 从“wchar_t”转换到“char”，可能丢失数据 [
+E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
+  (编译源文件“../src/config_tool/config_dialog.cpp”)
+      E:\VS-ALL\Product\VC\Tools\MSVC\14.51.36231\include\xutility(5094,18):
+      模板实例化上下文(最早的实例化上下文)为
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(197,52):
+          查看对正在编译的函数 模板 实例化“std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<wchar_t*,
+  0>(_Iter,_Iter,const _Alloc &)”的引用
+          with
+          [
+              _Iter=wchar_t *,
+              _Alloc=std::allocator<char>
+          ]
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(197,39):
+              请参阅 "ConfigDialog::onBrowseCustomCursor" 中对 "std::basic_string<char,std::char_traits<char>,std::allocator
+  <char>>::basic_string" 的第一个引用
+          E:\VS-ALL\Product\VC\Tools\MSVC\14.51.36231\include\xstring(862,17):
+          查看对正在编译的函数 模板 实例化“void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_i
+  ter<wchar_t*,wchar_t*,_Size_type>(_Iter,const _Sent,_Size)”的引用
+          with
+          [
+              _Size_type=unsigned __int64,
+              _Iter=wchar_t *,
+              _Sent=wchar_t *,
+              _Size=unsigned __int64
+          ]
+          E:\VS-ALL\Product\VC\Tools\MSVC\14.51.36231\include\xstring(1018,18):
+          查看对正在编译的函数 模板 实例化“_OutIt *std::_Copy_n_unchecked4<wchar_t*,_Size,char*>(_InIt,_SizeTy,_OutIt) ”的引用
+          with
+          [
+              _OutIt=char *,
+              _Size=unsigned __int64,
+              _InIt=wchar_t *,
+              _SizeTy=unsigned __int64
+          ]
 
-E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(491,13): error C2660: “GetMessageW”: 函数不接受 0 个参数 [E:\玩转ai\c
-c_project\鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
-      E:\Windows Kits\10\Include\10.0.26100.0\um\winuser.h(3414,1):
-      参见“GetMessageW”的声明
-      E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(491,13):
-      尝试匹配参数列表“()”时
-
+  E:\E:\E:\
+config_dialog.obj : error LNK2019: 无法解析的外部符号 "public: void __cdecl MouseController::forceRestoreCursor(void)" (?forceRe
+storeCursor@MouseController@@QEAAXXZ)，函数 "public: __cdecl MouseController::~MouseController(void)" (??1MouseController@
+@QEAA@XZ) 中引用了该符号 [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
+config_dialog.obj : error LNK2019: 无法解析的外部符号 "struct HICON__ * __cdecl createPreviewCursor(int,class std::basic_string<
+char,struct std::char_traits<char>,class std::allocator<char> > const &,unsigned long)" (?createPreviewCursor@@YAPEAUHI
+CON__@@HAEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@K@Z)，函数 "private: void __cdecl ConfigDialog::u
+pdatePreviewCursor(void)" (?updatePreviewCursor@ConfigDialog@@AEAAXXZ) 中引用了该符号 [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_f
+ocus_config.vcxproj]
+E:\玩转ai\cc_project\鼠标聚焦脚本\build\Release\mouse_focus_config.exe : fatal error LNK1120: 2 个无法解析的外部命令 [E:\玩转ai\cc_project\
+鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
   daemon_main.cpp
   application.cpp
   trigger_detector.cpp
   mouse_controller.cpp
-E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(118,29): error C2248: “MouseController::createColorCursor”: 无
-法访问 private 成员(在“MouseController”类中声明) [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_daemon.vcxproj]
-      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(74,26):
-      参见“MouseController::createColorCursor”的声明
-      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.h(9,7):
-      参见“MouseController”的声明
-
-  config_manager.cpp
   正在生成代码...
-  config_manager.cpp
-  mouse_controller.cpp
-E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(118,29): error C2248: “MouseController::createColorCursor”: 无
-法访问 private 成员(在“MouseController”类中声明) [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_test.vcxproj]
-      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(74,26):
-      参见“MouseController::createColorCursor”的声明
-      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.h(9,7):
-      参见“MouseController”的声明
-
+  mouse_focus_daemon.vcxproj -> E:\玩转ai\cc_project\鼠标聚焦脚本\build\Release\mouse_focus_daemon.exe
   test_harness.cpp
+  mouse_controller.cpp
   正在生成代码...
+  mouse_focus_test.vcxproj -> E:\玩转ai\cc_project\鼠标聚焦脚本\build\Release\mouse_focus_test.exe

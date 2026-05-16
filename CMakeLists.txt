@@ -29,6 +29,7 @@ add_executable(mouse_focus_config WIN32
     src/config_tool/daemon_controller.cpp
     src/common/config_manager.cpp
     src/common/adaptation_layer.cpp
+    src/daemon/mouse_controller.cpp
     src/mouse_focus.rc
 )
 target_include_directories(mouse_focus_config PRIVATE src)

@@ -131,9 +131,8 @@ void ConfigDialog::updatePreviewCursor() {
     } else {
         HWND hCombo = GetDlgItem(m_hwnd, IDC_COMBO_SHAPE);
         int sel = (int)SendMessageW(hCombo, CB_GETCURSEL, 0, 0);
-        const wchar_t* shapes[] = { L"circle", L"square", L"diamond", L"arrow", L"cross", L"custom" };
-        std::string shape = (sel >= 0 && sel < 6) ?
-            std::string(shapes[sel], shapes[sel] + wcslen(shapes[sel])) : "circle";
+        const char* shapeKeys[] = { "circle", "square", "diamond", "arrow", "cross", "custom" };
+        std::string shape = (sel >= 0 && sel < 6) ? shapeKeys[sel] : "circle";
 
         int size = (int)GetDlgItemInt(m_hwnd, IDC_EDIT_HIGHLIGHT_SIZE, nullptr, FALSE);
         if (size < 24) size = 48;
@@ -194,7 +193,12 @@ void ConfigDialog::onBrowseCustomCursor(HWND hwnd) {
     ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
 
     if (GetOpenFileNameW(&ofn)) {
-        m_working.highlightCustomFile = std::string(file, file + wcslen(file));
+        int len = WideCharToMultiByte(CP_UTF8, 0, file, -1, nullptr, 0, nullptr, nullptr);
+        if (len > 1) {
+            std::string s(len - 1, '\0');
+            WideCharToMultiByte(CP_UTF8, 0, file, -1, s.data(), len, nullptr, nullptr);
+            m_working.highlightCustomFile = s;
+        }
         updatePreviewCursor();
     }
 }
