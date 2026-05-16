@@ -5,7 +5,7 @@
   "smoothDurationMs": 600,
   "moveDelayMs": 100,
   "highlightEnabled": false,
-  "highlightShape": "circle",
+  "highlightShape": "arrow",
   "highlightColor": 65535,
   "highlightSize": 48,
   "highlightCustomFile": "",

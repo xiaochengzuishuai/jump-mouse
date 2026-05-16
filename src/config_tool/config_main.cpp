@@ -58,12 +58,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
     // Register custom canvas class
     WNDCLASSEXW wc = { sizeof(wc) };
+    wc.style = CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc = CanvasWndProc;
     wc.hInstance = hInstance;
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wc.lpszClassName = L"CursorCanvas";
-    RegisterClassExW(&wc);
+    if (!RegisterClassExW(&wc) && GetLastError() != ERROR_CLASS_ALREADY_EXISTS)
+        return 1;
 
     auto configPath = resolveConfigPath();
     ConfigDialog dlg(hInstance, configPath);

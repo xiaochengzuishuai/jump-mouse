@@ -70,10 +70,11 @@ bool ConfigManager::load(const std::wstring& path) {
         if (cfg.moveDelayMs > 2000) cfg.moveDelayMs = 2000;
         if (cfg.highlightSize < 24) cfg.highlightSize = 24;
         if (cfg.highlightSize > 128) cfg.highlightSize = 128;
-        if (cfg.highlightShape != "circle" && cfg.highlightShape != "square"
-         && cfg.highlightShape != "diamond" && cfg.highlightShape != "arrow"
-         && cfg.highlightShape != "cross" && cfg.highlightShape != "custom")
-            cfg.highlightShape = "circle";
+        if (cfg.highlightShape != "arrow" && cfg.highlightShape != "hand"
+         && cfg.highlightShape != "ibeam" && cfg.highlightShape != "cross"
+         && cfg.highlightShape != "sizeall" && cfg.highlightShape != "wait"
+         && cfg.highlightShape != "circle" && cfg.highlightShape != "square")
+            cfg.highlightShape = "arrow";
         if (cfg.targetArea != "window_rect" && cfg.targetArea != "client_rect")
             cfg.targetArea = "window_rect";
 

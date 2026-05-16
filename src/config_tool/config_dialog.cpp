@@ -125,8 +125,8 @@ void ConfigDialog::updatePreviewCursor() {
     } else {
         HWND hCombo = GetDlgItem(m_hwnd, IDC_COMBO_SHAPE);
         int si = (int)SendMessageW(hCombo, CB_GETCURSEL, 0, 0);
-        const char* keys[] = { "circle", "square", "diamond", "arrow", "cross", "custom" };
-        std::string shape = (si >= 0 && si < 6) ? keys[si] : "circle";
+        const char* keys[] = { "arrow","hand","ibeam","cross","sizeall","wait","circle","square" };
+        std::string shape = (si >= 0 && si < 8) ? keys[si] : "arrow";
         m_hCurPreview = MouseController::createColorCursor(size, shape, m_working.highlightColor);
     }
     if (!m_hCurPreview) m_hCurPreview = CopyCursor(LoadCursor(nullptr, IDC_ARROW));
@@ -141,8 +141,14 @@ void ConfigDialog::updatePreviewCursor() {
 void ConfigDialog::updateHighlightControls(HWND hwnd) {
     bool enabled = IsDlgButtonChecked(hwnd, IDC_CHECK_HIGHLIGHT) == BST_CHECKED;
     bool useFile = IsDlgButtonChecked(hwnd, IDC_RADIO_FILE) == BST_CHECKED;
+
+    // Check if shape is custom colored (circle/square) vs system cursor
+    HWND hCombo = GetDlgItem(hwnd, IDC_COMBO_SHAPE);
+    int si = (int)SendMessageW(hCombo, CB_GETCURSEL, 0, 0);
+    bool isCustomColored = (si >= 6); // indices 6=circle, 7=square
+
     EnableWindow(GetDlgItem(hwnd, IDC_COMBO_SHAPE), enabled && !useFile);
-    EnableWindow(GetDlgItem(hwnd, IDC_BTN_COLOR), enabled && !useFile);
+    EnableWindow(GetDlgItem(hwnd, IDC_BTN_COLOR), enabled && !useFile && isCustomColored);
     EnableWindow(GetDlgItem(hwnd, IDC_EDIT_HIGHLIGHT_SIZE), enabled);
     EnableWindow(GetDlgItem(hwnd, IDC_SPIN_HIGHLIGHT_SIZE), enabled);
     EnableWindow(GetDlgItem(hwnd, IDC_RADIO_CONFIG), enabled);
@@ -203,22 +209,28 @@ void ConfigDialog::onInit(HWND hwnd) {
     SetDlgItemInt(hwnd, IDC_EDIT_HIGHLIGHT_SIZE, cfg.highlightSize, FALSE);
     SendDlgItemMessageW(hwnd, IDC_SPIN_HIGHLIGHT_SIZE, UDM_SETRANGE32, 24, 128);
 
-    // Shape combo
+    // Shape combo (system cursor states + custom colored)
     HWND shapeCombo = GetDlgItem(hwnd, IDC_COMBO_SHAPE);
     if (shapeCombo) {
-        const wchar_t* names[] = { L"圆形", L"方形", L"菱形", L"箭头", L"十字", L"自定义文件" };
-        const char*    keys[]  = { "circle","square","diamond","arrow","cross","custom" };
-        for (int i = 0; i < 6; ++i)
+        const wchar_t* names[] = {
+            L"标准选择 (箭头)", L"链接选择 (手型)", L"文本选择 (I型)",
+            L"精确选择 (十字)", L"移动 (四向)",      L"忙碌 (等待)",
+            L"圆形彩色",        L"方形彩色"
+        };
+        const char* keys[] = {
+            "arrow","hand","ibeam","cross","sizeall","wait","circle","square"
+        };
+        for (int i = 0; i < 8; ++i)
             SendMessageW(shapeCombo, CB_ADDSTRING, 0, (LPARAM)names[i]);
         int sel = 0;
-        for (int i = 0; i < 6; ++i) { if (cfg.highlightShape == keys[i]) { sel = i; break; } }
+        for (int i = 0; i < 8; ++i) { if (cfg.highlightShape == keys[i]) { sel = i; break; } }
         SendMessageW(shapeCombo, CB_SETCURSEL, sel, 0);
     }
 
-    // Radio toggle: config vs file
-    bool isCustomFile = (cfg.highlightShape == "custom" && !cfg.highlightCustomFile.empty());
+    // Radio toggle: config vs file (determined by presence of custom file)
+    bool hasCustomFile = !cfg.highlightCustomFile.empty();
     CheckRadioButton(hwnd, IDC_RADIO_CONFIG, IDC_RADIO_FILE,
-        isCustomFile ? IDC_RADIO_FILE : IDC_RADIO_CONFIG);
+        hasCustomFile ? IDC_RADIO_FILE : IDC_RADIO_CONFIG);
 
     updateHighlightControls(hwnd);
 
@@ -277,8 +289,8 @@ void ConfigDialog::collectValues(HWND hwnd) {
 
     HWND shapeCombo = GetDlgItem(hwnd, IDC_COMBO_SHAPE);
     int si = (int)SendMessageW(shapeCombo, CB_GETCURSEL, 0, 0);
-    const char* keys[] = { "circle","square","diamond","arrow","cross","custom" };
-    m_working.highlightShape = (si >= 0 && si < 6) ? keys[si] : "circle";
+    const char* keys[] = { "arrow","hand","ibeam","cross","sizeall","wait","circle","square" };
+    m_working.highlightShape = (si >= 0 && si < 8) ? keys[si] : "arrow";
 
     // Color is already in m_working.highlightColor (set via color picker or init)
 

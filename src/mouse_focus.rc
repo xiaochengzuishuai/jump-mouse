@@ -48,25 +48,26 @@ FONT 9, "Segoe UI"
     CONTROL         "启用", IDC_CHECK_HIGHLIGHT, "Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP, 22, 142, 45, 14
 
-    CONTROL         "当前光标", IDC_STATIC, "Static", SS_BITMAP | SS_REALSIZEIMAGE, 22, 162, 72, 12
+    LTEXT           "当前光标", IDC_STATIC, 22, 162, 68, 12
     CONTROL         "", IDC_CANVAS_CURRENT, "CursorCanvas", WS_BORDER, 22, 176, 68, 68
-    CONTROL         "临时变更预览", IDC_STATIC, "Static", 0, 108, 162, 100, 12
+    LTEXT           "预览", IDC_STATIC, 108, 162, 68, 12
     CONTROL         "", IDC_CANVAS_PREVIEW, "CursorCanvas", WS_BORDER, 108, 176, 68, 68
 
     LTEXT           "形状:", IDC_STATIC, 195, 170, 30, 12
-    COMBOBOX        IDC_COMBO_SHAPE, 225, 168, 100, 120, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_SHAPE, 225, 168, 85, 150, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 
-    PUSHBUTTON      "选择颜色...", IDC_BTN_COLOR, 195, 192, 75, 14
-    LTEXT           "大小:", IDC_STATIC, 280, 170, 28, 12
-    EDITTEXT        IDC_EDIT_HIGHLIGHT_SIZE, 305, 168, 36, 14, ES_NUMBER | WS_TABSTOP
+    LTEXT           "大小:", IDC_STATIC, 320, 170, 30, 12
+    EDITTEXT        IDC_EDIT_HIGHLIGHT_SIZE, 348, 168, 36, 14, ES_NUMBER | WS_TABSTOP
     CONTROL         "", IDC_SPIN_HIGHLIGHT_SIZE, "msctls_updown32",
                     UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ALIGNRIGHT | UDS_ARROWKEYS, 0, 0, 0, 0
 
+    PUSHBUTTON      "颜色...", IDC_BTN_COLOR, 195, 192, 60, 14
+
     CONTROL         "个性化配置", IDC_RADIO_CONFIG, "Button",
                     BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP, 195, 214, 80, 14
-    CONTROL         "导入光标文件", IDC_RADIO_FILE, "Button",
-                    BS_AUTORADIOBUTTON | WS_TABSTOP, 275, 214, 90, 14
-    PUSHBUTTON      "浏览...", IDC_BTN_BROWSE_CUR, 195, 232, 75, 14
+    CONTROL         "导入文件", IDC_RADIO_FILE, "Button",
+                    BS_AUTORADIOBUTTON | WS_TABSTOP, 275, 214, 70, 14
+    PUSHBUTTON      "浏览...", IDC_BTN_BROWSE_CUR, 195, 232, 60, 14
 
     LTEXT           "检测到鼠标移动后自动恢复原始光标", IDC_STATIC, 22, 255, 300, 12
 
