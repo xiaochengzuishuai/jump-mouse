@@ -62,30 +62,61 @@ void MouseController::setBit(std::vector<BYTE>& plane, int stride, int x, int y,
 }
 
 HCURSOR MouseController::createColorCursor(int size) {
-    int andStride = ((size + 15) / 16) * 2;
-    std::vector<BYTE> andPlane(andStride * size, 0xFF);
-    std::vector<BYTE> xorPlane(size * size * 4, 0);
-
     int r = size / 2;
     int r2 = r * r;
 
+    // AND mask: monochrome, word-aligned
+    int andStride = ((size + 15) / 16) * 2;
+    std::vector<BYTE> andBits(andStride * size, 0xFF);
+
+    // Color: 32-bit BGRA top-down DIB
+    BITMAPINFO bmi = {};
+    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biWidth = size;
+    bmi.bmiHeader.biHeight = -size;
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 32;
+    bmi.bmiHeader.biCompression = BI_RGB;
+
+    HDC hdc = GetDC(nullptr);
+    BYTE* pColor = nullptr;
+    HBITMAP hbmColor = CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS,
+        reinterpret_cast<void**>(&pColor), nullptr, 0);
+    ReleaseDC(nullptr, hdc);
+
+    if (!hbmColor || !pColor) {
+        if (hbmColor) DeleteObject(hbmColor);
+        return nullptr;
+    }
+
+    int rowBytes = size * 4;
     for (int y = 0; y < size; ++y) {
         for (int x = 0; x < size; ++x) {
-            int dx = x - r;
-            int dy = y - r;
+            int dx = x - r, dy = y - r;
             if (dx * dx + dy * dy <= r2) {
-                setBit(andPlane, andStride, x, y, false);
-                int off = (y * size + x) * 4;
-                xorPlane[off + 0] = 0x00; // B
-                xorPlane[off + 1] = 0xFF; // G
-                xorPlane[off + 2] = 0xFF; // R
-                xorPlane[off + 3] = 0x00;
+                setBit(andBits, andStride, x, y, false);
+                int off = y * rowBytes + x * 4;
+                pColor[off + 0] = 0x00; // B
+                pColor[off + 1] = 0xFF; // G
+                pColor[off + 2] = 0xFF; // R
+                pColor[off + 3] = 0x00; // A
             }
         }
     }
 
-    return CreateCursor(GetModuleHandleW(nullptr), r, r, size, size,
-        andPlane.data(), xorPlane.data());
+    HBITMAP hbmMask = CreateBitmap(size, size, 1, 1, andBits.data());
+
+    ICONINFO ii = {};
+    ii.fIcon = FALSE;
+    ii.xHotspot = r;
+    ii.yHotspot = r;
+    ii.hbmMask = hbmMask;
+    ii.hbmColor = hbmColor;
+
+    HCURSOR hCursor = CreateIconIndirect(&ii);
+    DeleteObject(hbmMask);
+    DeleteObject(hbmColor);
+    return hCursor;
 }
 
 bool MouseController::applyHighlight() {
@@ -93,7 +124,7 @@ bool MouseController::applyHighlight() {
 
     // Save original arrow cursor (CopyImage makes an independent copy)
     m_originalCursor = (HCURSOR)CopyImage(
-        LoadCursorW(nullptr, IDC_ARROW), IMAGE_CURSOR, 0, 0, LR_COPYFROMRESOURCE);
+        LoadCursor(nullptr, IDC_ARROW), IMAGE_CURSOR, 0, 0, LR_COPYFROMRESOURCE);
     if (!m_originalCursor) {
         LOG_DEBUG("  Could not save original cursor");
         return false;
@@ -107,7 +138,7 @@ bool MouseController::applyHighlight() {
         return false;
     }
 
-    if (!SetSystemCursor(hNew, OCR_NORMAL)) {
+    if (!SetSystemCursor(hNew, 32512)) {  // OCR_NORMAL
         LOG_DEBUG("  SetSystemCursor failed (may need elevation)");
         DestroyCursor(hNew);
         DestroyCursor(m_originalCursor);
@@ -146,7 +177,7 @@ void MouseController::forceRestoreCursor() {
     if (m_originalCursor) {
         HCURSOR hRestore = CopyCursor(m_originalCursor);
         if (hRestore) {
-            SetSystemCursor(hRestore, OCR_NORMAL);
+            SetSystemCursor(hRestore, 32512);
         }
         DestroyCursor(m_originalCursor);
         m_originalCursor = nullptr;

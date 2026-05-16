@@ -7,9 +7,9 @@
 struct AppConfig {
     int version = 1;
     std::string triggerMode = "alt_tab_only";
-    std::string mouseMode = "instant";
-    int smoothDurationMs = 150;
-    int moveDelayMs = 0;
+    std::string mouseMode = "smooth";
+    int smoothDurationMs = 600;
+    int moveDelayMs = 100;
     bool highlightEnabled = false;
     int highlightSize = 48;
     bool enabled = true;

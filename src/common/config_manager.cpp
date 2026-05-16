@@ -37,9 +37,9 @@ bool ConfigManager::load(const std::wstring& path) {
         AppConfig cfg;
         cfg.version          = root.has("version") ? root["version"].asInt(1) : 1;
         cfg.triggerMode      = root.has("triggerMode") ? root["triggerMode"].asString("alt_tab_only") : "alt_tab_only";
-        cfg.mouseMode        = root.has("mouseMode") ? root["mouseMode"].asString("instant") : "instant";
-        cfg.smoothDurationMs = root.has("smoothDurationMs") ? root["smoothDurationMs"].asInt(150) : 150;
-        cfg.moveDelayMs      = root.has("moveDelayMs") ? root["moveDelayMs"].asInt(0) : 0;
+        cfg.mouseMode        = root.has("mouseMode") ? root["mouseMode"].asString("smooth") : "smooth";
+        cfg.smoothDurationMs = root.has("smoothDurationMs") ? root["smoothDurationMs"].asInt(600) : 600;
+        cfg.moveDelayMs      = root.has("moveDelayMs") ? root["moveDelayMs"].asInt(100) : 100;
         cfg.highlightEnabled = root.has("highlightEnabled") ? root["highlightEnabled"].asBool(false) : false;
         cfg.highlightSize    = root.has("highlightSize") ? root["highlightSize"].asInt(48) : 48;
         cfg.enabled          = root.has("enabled") ? root["enabled"].asBool(true) : true;
