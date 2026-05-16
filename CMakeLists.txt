@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # MSVC: treat source files as UTF-8
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+# UNICODE is required for Windows API wide-char support
+add_definitions(-DUNICODE -D_UNICODE)
 
 # ========== Daemon ==========
 add_executable(mouse_focus_daemon WIN32

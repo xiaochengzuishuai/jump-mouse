@@ -1,58 +1,207 @@
 E:\玩转ai\cc_project\鼠标聚焦脚本>cmake --build build --config Release
-CMake is re-running because E:/玩转ai/cc_project/鼠标聚焦脚本/build/CMakeFiles/generate.stamp is out-of-date.
-  the file 'E:/玩转ai/cc_project/鼠标聚焦脚本/CMakeLists.txt'
-  is newer than 'E:/玩转ai/cc_project/鼠标聚焦脚本/build/CMakeFiles/generate.stamp.depend'
-  result='-1'
--- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.19045.
--- Configuring done (0.0s)
--- Generating done (0.0s)
--- Build files have been written to: E:/玩转ai/cc_project/鼠标聚焦脚本/build
 适用于 .NET Framework MSBuild 版本 18.6.3+84d3e95b4
 
-  1>Checking Build System
-  Building Custom Rule E:/玩转ai/cc_project/鼠标聚焦脚本/CMakeLists.txt
+  config_manager.cpp
   config_dialog.cpp
-E:\VS-ALL\Product\VC\Tools\MSVC\14.51.36231\include\xutility(5094,18): warning C4244: “=”: 从“const wchar_t”转换到“char”，可能
-丢失数据 [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
-  (编译源文件“../src/config_tool/config_dialog.cpp”)
-      E:\VS-ALL\Product\VC\Tools\MSVC\14.51.36231\include\xutility(5094,18):
-      模板实例化上下文(最早的实例化上下文)为
-          E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(321,46):
-          查看对正在编译的函数 模板 实例化“std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<const wch
-  ar_t*,0>(_Iter,_Iter,const _Alloc &)”的引用
-          with
-          [
-              _Iter=const wchar_t *,
-              _Alloc=std::allocator<char>
-          ]
-              E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(321,9):
-              请参阅 "ConfigDialog::onInit" 中对 "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic
-  _string" 的第一个引用
-          E:\VS-ALL\Product\VC\Tools\MSVC\14.51.36231\include\xstring(862,17):
-          查看对正在编译的函数 模板 实例化“void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_i
-  ter<const wchar_t*,const wchar_t*,_Size_type>(_Iter,const _Sent,_Size)”的引用
-          with
-          [
-              _Size_type=unsigned __int64,
-              _Iter=const wchar_t *,
-              _Sent=const wchar_t *,
-              _Size=unsigned __int64
-          ]
-          E:\VS-ALL\Product\VC\Tools\MSVC\14.51.36231\include\xstring(1018,18):
-          查看对正在编译的函数 模板 实例化“_OutIt *std::_Copy_n_unchecked4<const wchar_t*,_Size,char*>(_InIt,_SizeTy,_OutIt)”的引用
-          with
-          [
-              _OutIt=char *,
-              _Size=unsigned __int64,
-              _InIt=const wchar_t *,
-              _SizeTy=unsigned __int64
-          ]
-
+  config_main.cpp
   mouse_controller.cpp
   正在生成代码...
-  mouse_focus_config.vcxproj -> E:\玩转ai\cc_project\鼠标聚焦脚本\build\Release\mouse_focus_config.exe
-  Building Custom Rule E:/玩转ai/cc_project/鼠标聚焦脚本/CMakeLists.txt
-  mouse_focus_daemon.vcxproj -> E:\玩转ai\cc_project\鼠标聚焦脚本\build\Release\mouse_focus_daemon.exe
-  Building Custom Rule E:/玩转ai/cc_project/鼠标聚焦脚本/CMakeLists.txt
-  mouse_focus_test.vcxproj -> E:\玩转ai\cc_project\鼠标聚焦脚本\build\Release\mouse_focus_test.exe
-  Building Custom Rule E:/玩转ai/cc_project/鼠标聚焦脚本/CMakeLists.txt
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(68,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(68,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(68,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(68,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(69,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(69,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(69,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(69,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(70,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(70,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(70,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(70,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(71,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(71,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(71,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(71,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(72,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(72,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(72,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(72,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(73,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(73,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(73,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(73,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(88,24): error C2664: “HCURSOR LoadCursorA(HINSTANCE,LPCSTR)”:
+ 无法将参数 2 从“LPCWSTR”转换为“LPCSTR” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(88,47):
+      指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+      E:\Windows Kits\10\Include\10.0.26100.0\um\winuser.h(10612,1):
+      参见“LoadCursorA”的声明
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(88,24):
+      尝试匹配参数列表“(nullptr, LPCWSTR)”时
+
+  config_manager.cpp
+  application.cpp
+  daemon_main.cpp
+  mouse_controller.cpp
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(68,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_daemon.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(68,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(68,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(68,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(69,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_daemon.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(69,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(69,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(69,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(70,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_daemon.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(70,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(70,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(70,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(71,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_daemon.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(71,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(71,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(71,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(72,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_daemon.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(72,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(72,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(72,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(73,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_daemon.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(73,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(73,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(73,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(88,24): error C2664: “HCURSOR LoadCursorA(HINSTANCE,LPCSTR)”:
+ 无法将参数 2 从“LPCWSTR”转换为“LPCSTR” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_daemon.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(88,47):
+      指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+      E:\Windows Kits\10\Include\10.0.26100.0\um\winuser.h(10612,1):
+      参见“LoadCursorA”的声明
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(88,24):
+      尝试匹配参数列表“(nullptr, LPCWSTR)”时
+
+  trigger_detector.cpp
+  正在生成代码...
+  config_manager.cpp
+  mouse_controller.cpp
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(68,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_test.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(68,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(68,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(68,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(69,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_test.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(69,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(69,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(69,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(70,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_test.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(70,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(70,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(70,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(71,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_test.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(71,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(71,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(71,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(72,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_test.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(72,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(72,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(72,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(73,34): error C2440: “return”: 无法从“initializer list”转换为“Curso
+rShapeDef” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_test.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(73,34):
+      无效的聚合初始化
+          E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(73,36):
+          “初始化”: 无法从“LPSTR”转换为“LPCWSTR”
+              E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(73,36):
+              指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(88,24): error C2664: “HCURSOR LoadCursorA(HINSTANCE,LPCSTR)”:
+ 无法将参数 2 从“LPCWSTR”转换为“LPCSTR” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_test.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(88,47):
+      指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
+      E:\Windows Kits\10\Include\10.0.26100.0\um\winuser.h(10612,1):
+      参见“LoadCursorA”的声明
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(88,24):
+      尝试匹配参数列表“(nullptr, LPCWSTR)”时
+
+  test_harness.cpp
+  正在生成代码...
