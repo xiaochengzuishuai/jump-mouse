@@ -21,15 +21,30 @@ static LRESULT CALLBACK CanvasProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
         HCURSOR hCur = (HCURSOR)GetPropW(hwnd, L"CURSOR");
         if (!hCur) hCur = LoadCursor(nullptr, IDC_ARROW);
 
-        // Draw centered
         ICONINFO ii = {};
         if (GetIconInfo(hCur, &ii)) {
-            int cx = GetSystemMetrics(SM_CXCURSOR) * 2;
-            int cy = GetSystemMetrics(SM_CYCURSOR) * 2;
-            if (cx < 48) cx = 48;
-            int x = (rc.right - rc.left - cx) / 2;
-            int y = (rc.bottom - rc.top - cy) / 2;
-            DrawIconEx(hdc, x, y, hCur, cx, cy, 0, nullptr, DI_NORMAL);
+            // Get actual cursor bitmap size
+            BITMAP bm = {};
+            int curW = 32, curH = 32;
+            if (ii.hbmColor && GetObjectW(ii.hbmColor, sizeof(bm), &bm)) {
+                curW = bm.bmWidth; curH = bm.bmHeight;
+            } else if (ii.hbmMask && GetObjectW(ii.hbmMask, sizeof(bm), &bm)) {
+                curW = bm.bmWidth; curH = bm.bmHeight / 2;
+            }
+
+            // Scale to fit canvas with padding
+            int pad = 8;
+            int availW = rc.right - rc.left - pad * 2;
+            int availH = rc.bottom - rc.top - pad * 2;
+            float scale = 2.0f;
+            if (curW > 0) scale = min(scale, (float)availW / curW);
+            if (curH > 0) scale = min(scale, (float)availH / curH);
+            int drawW = (int)(curW * scale);
+            int drawH = (int)(curH * scale);
+
+            int x = (rc.right - rc.left - drawW) / 2;
+            int y = (rc.bottom - rc.top - drawH) / 2;
+            DrawIconEx(hdc, x, y, hCur, drawW, drawH, 0, nullptr, DI_NORMAL);
             if (ii.hbmMask)  DeleteObject(ii.hbmMask);
             if (ii.hbmColor) DeleteObject(ii.hbmColor);
         }
