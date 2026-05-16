@@ -60,7 +60,7 @@ add_custom_command(TARGET mouse_focus_config POST_BUILD
         "$<TARGET_FILE_DIR:mouse_focus_config>/1.ico"
 )
 
-# ========== DPI awareness (PerMonitorV2) ==========
-set_target_properties(mouse_focus_daemon mouse_focus_config PROPERTIES
-    VS_DPI_AWARE "PerMonitorV2"
-)
+# ========== DPI awareness ==========
+# Embedded via .rc files (dpi_aware.manifest). Disable MSVC auto-manifest.
+target_link_options(mouse_focus_daemon PRIVATE "/MANIFEST:NO")
+target_link_options(mouse_focus_config PRIVATE "/MANIFEST:NO")

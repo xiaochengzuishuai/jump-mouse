@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include "resource.h"
 
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "dpi_aware.manifest"
 IDI_APP_ICON ICON "../ico图标/1.ico"
 
 // Spin control constants (from CommCtrl.h)

@@ -1,2 +1,6 @@
+#pragma code_page(65001)
+
 #include <Windows.h>
+
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "dpi_aware.manifest"
 IDI_APP_ICON ICON "../ico图标/exe.ico"
