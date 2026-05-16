@@ -311,14 +311,13 @@ void ConfigDialog::onInit(HWND hwnd) {
     // Shape combo
     HWND shapeCombo = GetDlgItem(hwnd, IDC_COMBO_SHAPE);
     const wchar_t* shapeNames[] = { L"圆形", L"方形", L"菱形", L"箭头", L"十字", L"自定义文件" };
-    const wchar_t* shapeKeys[]  = { L"circle", L"square", L"diamond", L"arrow", L"cross", L"custom" };
     for (int i = 0; i < 6; ++i) {
         int idx = (int)SendMessageW(shapeCombo, CB_ADDSTRING, 0, (LPARAM)shapeNames[i]);
         SendMessageW(shapeCombo, CB_SETITEMDATA, idx, (LPARAM)i);
     }
-    // Select current
+    const char* shapeKeys[] = { "circle", "square", "diamond", "arrow", "cross", "custom" };
     for (int i = 0; i < 6; ++i) {
-        if (cfg.highlightShape == std::string(shapeKeys[i], shapeKeys[i] + wcslen(shapeKeys[i]))) {
+        if (cfg.highlightShape == shapeKeys[i]) {
             SendMessageW(shapeCombo, CB_SETCURSEL, i, 0);
             break;
         }
