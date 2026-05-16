@@ -66,12 +66,12 @@ FONT 9, "Segoe UI"
 
     LTEXT           "当前光标", IDC_STATIC, 22, 162, 72, 12
     CONTROL         "", IDC_CANVAS_CURRENT, "Static",
-                    SS_OWNERDRAW | SS_NOTIFY | WS_BORDER,
+                    SS_NOTIFY | WS_BORDER,
                     22, 176, 72, 72
 
     LTEXT           "临时变更预览", IDC_STATIC, 110, 162, 100, 12
     CONTROL         "", IDC_CANVAS_PREVIEW, "Static",
-                    SS_OWNERDRAW | SS_NOTIFY | WS_BORDER,
+                    SS_NOTIFY | WS_BORDER,
                     110, 176, 72, 72
 
     LTEXT           "形状:", IDC_STATIC, 200, 170, 30, 12

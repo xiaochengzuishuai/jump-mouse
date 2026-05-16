@@ -42,7 +42,7 @@ private:
 
     bool m_highlight = false;
     std::string m_highlightShape = "circle";
-    int m_highlightColor = 0x0000FF;
+    int m_highlightColor = 0x0000FFFF;  // COLORREF: RGB(255,255,0) = yellow
     int m_highlightSize = 48;
     std::string m_highlightCustomFile;
     bool m_highlightActive = false;
