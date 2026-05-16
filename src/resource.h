@@ -21,6 +21,11 @@
 #define IDC_EDIT_DELAY          1032
 #define IDC_SPIN_DELAY          1033
 
+// Highlight
+#define IDC_CHECK_HIGHLIGHT     1034
+#define IDC_EDIT_HIGHLIGHT_SIZE 1035
+#define IDC_SPIN_HIGHLIGHT_SIZE 1036
+
 // Radio buttons — target area
 #define IDC_RADIO_WINDOW        1040
 #define IDC_RADIO_CLIENT        1041

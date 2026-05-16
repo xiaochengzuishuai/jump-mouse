@@ -10,6 +10,8 @@ struct AppConfig {
     std::string mouseMode = "instant";
     int smoothDurationMs = 150;
     int moveDelayMs = 0;
+    bool highlightEnabled = false;
+    int highlightSize = 48;
     bool enabled = true;
     std::string targetArea = "window_rect";
     std::vector<std::string> excludedProcesses;

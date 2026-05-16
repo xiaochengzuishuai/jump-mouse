@@ -40,6 +40,8 @@ bool ConfigManager::load(const std::wstring& path) {
         cfg.mouseMode        = root.has("mouseMode") ? root["mouseMode"].asString("instant") : "instant";
         cfg.smoothDurationMs = root.has("smoothDurationMs") ? root["smoothDurationMs"].asInt(150) : 150;
         cfg.moveDelayMs      = root.has("moveDelayMs") ? root["moveDelayMs"].asInt(0) : 0;
+        cfg.highlightEnabled = root.has("highlightEnabled") ? root["highlightEnabled"].asBool(false) : false;
+        cfg.highlightSize    = root.has("highlightSize") ? root["highlightSize"].asInt(48) : 48;
         cfg.enabled          = root.has("enabled") ? root["enabled"].asBool(true) : true;
         cfg.targetArea       = root.has("targetArea") ? root["targetArea"].asString("window_rect") : "window_rect";
         cfg.logLevel         = root.has("logLevel") ? root["logLevel"].asString("none") : "none";
@@ -63,6 +65,8 @@ bool ConfigManager::load(const std::wstring& path) {
         if (cfg.smoothDurationMs > 600) cfg.smoothDurationMs = 600;
         if (cfg.moveDelayMs < 0) cfg.moveDelayMs = 0;
         if (cfg.moveDelayMs > 2000) cfg.moveDelayMs = 2000;
+        if (cfg.highlightSize < 24) cfg.highlightSize = 24;
+        if (cfg.highlightSize > 128) cfg.highlightSize = 128;
         if (cfg.targetArea != "window_rect" && cfg.targetArea != "client_rect")
             cfg.targetArea = "window_rect";
 
@@ -84,6 +88,8 @@ bool ConfigManager::save(const std::wstring& path) const {
         root["mouseMode"]        = JsonValue::makeString(m_cfg.mouseMode);
         root["smoothDurationMs"] = JsonValue::makeInt(m_cfg.smoothDurationMs);
         root["moveDelayMs"]      = JsonValue::makeInt(m_cfg.moveDelayMs);
+        root["highlightEnabled"] = JsonValue::makeBool(m_cfg.highlightEnabled);
+        root["highlightSize"]    = JsonValue::makeInt(m_cfg.highlightSize);
         root["enabled"]          = JsonValue::makeBool(m_cfg.enabled);
         root["targetArea"]       = JsonValue::makeString(m_cfg.targetArea);
         root["logLevel"]         = JsonValue::makeString(m_cfg.logLevel);

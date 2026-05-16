@@ -4,6 +4,8 @@
   "mouseMode": "instant",
   "smoothDurationMs": 150,
   "moveDelayMs": 0,
+  "highlightEnabled": false,
+  "highlightSize": 48,
   "enabled": true,
   "targetArea": "window_rect",
   "excludedProcesses": [],

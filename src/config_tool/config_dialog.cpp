@@ -198,6 +198,11 @@ void ConfigDialog::onInit(HWND hwnd) {
     SetDlgItemInt(hwnd, IDC_EDIT_DELAY, cfg.moveDelayMs, FALSE);
     SendDlgItemMessageW(hwnd, IDC_SPIN_DELAY, UDM_SETRANGE32, 0, 2000);
 
+    // Highlight
+    CheckDlgButton(hwnd, IDC_CHECK_HIGHLIGHT, cfg.highlightEnabled ? BST_CHECKED : BST_UNCHECKED);
+    SetDlgItemInt(hwnd, IDC_EDIT_HIGHLIGHT_SIZE, cfg.highlightSize, FALSE);
+    SendDlgItemMessageW(hwnd, IDC_SPIN_HIGHLIGHT_SIZE, UDM_SETRANGE32, 24, 128);
+
     CheckRadioButton(hwnd, IDC_RADIO_WINDOW, IDC_RADIO_CLIENT,
         cfg.targetArea == "client_rect" ? IDC_RADIO_CLIENT : IDC_RADIO_WINDOW);
 
@@ -257,6 +262,15 @@ void ConfigDialog::collectValues(HWND hwnd) {
         if (delay < 0) delay = 0;
         if (delay > 2000) delay = 2000;
         m_working.moveDelayMs = delay;
+    }
+
+    // Highlight
+    m_working.highlightEnabled = IsDlgButtonChecked(hwnd, IDC_CHECK_HIGHLIGHT) == BST_CHECKED;
+    int hlSize = GetDlgItemInt(hwnd, IDC_EDIT_HIGHLIGHT_SIZE, &translated, FALSE);
+    if (translated) {
+        if (hlSize < 24) hlSize = 24;
+        if (hlSize > 128) hlSize = 128;
+        m_working.highlightSize = hlSize;
     }
 
     m_working.targetArea = IsDlgButtonChecked(hwnd, IDC_RADIO_CLIENT) == BST_CHECKED
