@@ -32,8 +32,11 @@
 
 // Highlight shape & color
 #define IDC_COMBO_SHAPE         1050
-#define IDC_COMBO_COLOR         1051
+#define IDC_BTN_COLOR            1051
 #define IDC_BTN_BROWSE_CUR      1052
+// Toggle
+#define IDC_RADIO_CONFIG         1053
+#define IDC_RADIO_FILE           1054
 
 // Radio buttons — target area
 #define IDC_RADIO_WINDOW        1040

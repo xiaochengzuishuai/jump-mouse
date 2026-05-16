@@ -4,75 +4,22 @@
 #include "../daemon/mouse_controller.h"
 #include <CommCtrl.h>
 #include <commdlg.h>
-#include <map>
 
 static INT_PTR CALLBACK inputDlgProc(HWND, UINT, WPARAM, LPARAM);
 
-// Canvas subclass: draws an HCURSOR stored as window property "CURSOR"
-static LRESULT CALLBACK CanvasProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    if (msg == WM_PAINT) {
-        PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(hwnd, &ps);
-        RECT rc; GetClientRect(hwnd, &rc);
-
-        // Background
-        FillRect(hdc, &rc, GetSysColorBrush(COLOR_WINDOW));
-
-        HCURSOR hCur = (HCURSOR)GetPropW(hwnd, L"CURSOR");
-        if (!hCur) hCur = LoadCursor(nullptr, IDC_ARROW);
-
-        ICONINFO ii = {};
-        if (GetIconInfo(hCur, &ii)) {
-            // Get actual cursor bitmap size
-            BITMAP bm = {};
-            int curW = 32, curH = 32;
-            if (ii.hbmColor && GetObjectW(ii.hbmColor, sizeof(bm), &bm)) {
-                curW = bm.bmWidth; curH = bm.bmHeight;
-            } else if (ii.hbmMask && GetObjectW(ii.hbmMask, sizeof(bm), &bm)) {
-                curW = bm.bmWidth; curH = bm.bmHeight / 2;
-            }
-
-            // Scale to fit canvas with padding
-            int pad = 8;
-            int availW = rc.right - rc.left - pad * 2;
-            int availH = rc.bottom - rc.top - pad * 2;
-            float scale = 2.0f;
-            if (curW > 0) scale = min(scale, (float)availW / curW);
-            if (curH > 0) scale = min(scale, (float)availH / curH);
-            int drawW = (int)(curW * scale);
-            int drawH = (int)(curH * scale);
-
-            int x = (rc.right - rc.left - drawW) / 2;
-            int y = (rc.bottom - rc.top - drawH) / 2;
-            DrawIconEx(hdc, x, y, hCur, drawW, drawH, 0, nullptr, DI_NORMAL);
-            if (ii.hbmMask)  DeleteObject(ii.hbmMask);
-            if (ii.hbmColor) DeleteObject(ii.hbmColor);
-        }
-
-        // Frame
-        FrameRect(hdc, &rc, GetSysColorBrush(COLOR_GRAYTEXT));
-        EndPaint(hwnd, &ps);
-        return 0;
-    }
-    if (msg == WM_ERASEBKGND) return 1; // Handled in WM_PAINT
-    return DefWindowProcW(hwnd, msg, wParam, lParam);
-}
-
-// ===================== Constructor / Destructor =====================
+// ===================== Constructor =====================
 
 ConfigDialog::ConfigDialog(HINSTANCE hInstance, const std::wstring& configPath)
     : m_hInstance(hInstance), m_configPath(configPath) {
-    m_config.load(configPath);
-    m_working = m_config.get();
+    m_config.load(configPath); m_working = m_config.get();
 }
 ConfigDialog::~ConfigDialog() {
     if (m_hCurCurrent) DestroyCursor(m_hCurCurrent);
     if (m_hCurPreview) DestroyCursor(m_hCurPreview);
 }
-
 HWND ConfigDialog::create(HWND parent) {
     m_hwnd = CreateDialogParamW(m_hInstance, MAKEINTRESOURCEW(IDD_MAIN_DIALOG),
-        parent, dlgProc, reinterpret_cast<LPARAM>(this));
+        parent, dlgProc, (LPARAM)this);
     return m_hwnd;
 }
 void ConfigDialog::showWindow() { if (m_hwnd) { ShowWindow(m_hwnd, SW_SHOW); SetForegroundWindow(m_hwnd); } }
@@ -124,64 +71,6 @@ void ConfigDialog::onTrayMenu(WORD id) {
     }
 }
 
-// ===================== Preview =====================
-
-void ConfigDialog::updatePreviewCursor() {
-    if (m_hCurPreview) { DestroyCursor(m_hCurPreview); m_hCurPreview = nullptr; }
-
-    HWND hCombo = GetDlgItem(m_hwnd, IDC_COMBO_SHAPE);
-    int si = (int)SendMessageW(hCombo, CB_GETCURSEL, 0, 0);
-
-    const char* shapeKeys[] = { "circle", "square", "diamond", "arrow", "cross", "custom" };
-    std::string shape = (si >= 0 && si < 6) ? shapeKeys[si] : "circle";
-
-    BOOL translated; int size = (int)GetDlgItemInt(m_hwnd, IDC_EDIT_HIGHLIGHT_SIZE, &translated, FALSE);
-    if (!translated || size < 24) size = 48;
-
-    HWND hColorCombo = GetDlgItem(m_hwnd, IDC_COMBO_COLOR);
-    int ci = (int)SendMessageW(hColorCombo, CB_GETCURSEL, 0, 0);
-    COLORREF color = RGB(255, 255, 0); // yellow default
-    if (ci >= 0) color = (COLORREF)(INT_PTR)SendMessageW(hColorCombo, CB_GETITEMDATA, ci, 0);
-    // Ensure color is valid
-    if (color == 0 || color == CLR_INVALID || color > 0x00FFFFFF) color = RGB(255, 255, 0);
-
-    bool enabled = IsDlgButtonChecked(m_hwnd, IDC_CHECK_HIGHLIGHT) == BST_CHECKED;
-    if (!enabled) {
-        m_hCurPreview = CopyCursor(LoadCursor(nullptr, IDC_ARROW));
-    } else if (shape == "custom") {
-        if (!m_working.highlightCustomFile.empty()) {
-            std::wstring wf(m_working.highlightCustomFile.begin(), m_working.highlightCustomFile.end());
-            m_hCurPreview = (HCURSOR)LoadImageW(nullptr, wf.c_str(), IMAGE_CURSOR, size, size, LR_LOADFROMFILE);
-        }
-        if (!m_hCurPreview) m_hCurPreview = CopyCursor(LoadCursor(nullptr, IDC_ARROW));
-    } else {
-        m_hCurPreview = MouseController::createColorCursor(size, shape, color);
-    }
-    if (!m_hCurPreview) m_hCurPreview = CopyCursor(LoadCursor(nullptr, IDC_ARROW));
-
-    // Update preview canvas property and repaint
-    HWND hCanvas = GetDlgItem(m_hwnd, IDC_CANVAS_PREVIEW);
-    if (hCanvas) {
-        SetPropW(hCanvas, L"CURSOR", (HANDLE)m_hCurPreview);
-        InvalidateRect(hCanvas, nullptr, TRUE);
-        UpdateWindow(hCanvas);
-    }
-}
-
-void ConfigDialog::onBrowseCustomCursor(HWND hwnd) {
-    wchar_t file[MAX_PATH] = {};
-    OPENFILENAMEW ofn = { sizeof(ofn) };
-    ofn.hwndOwner = hwnd;
-    ofn.lpstrFilter = L"Cursor Files (*.cur)\0*.cur\0All Files (*.*)\0*.*\0";
-    ofn.lpstrFile = file; ofn.nMaxFile = MAX_PATH;
-    ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
-    if (GetOpenFileNameW(&ofn)) {
-        int len = WideCharToMultiByte(CP_UTF8, 0, file, -1, nullptr, 0, nullptr, nullptr);
-        if (len > 1) { std::string s(len-1, '\0'); WideCharToMultiByte(CP_UTF8, 0, file, -1, s.data(), len, nullptr, nullptr); m_working.highlightCustomFile = s; }
-        updatePreviewCursor();
-    }
-}
-
 // ===================== Dialog Proc =====================
 
 INT_PTR CALLBACK ConfigDialog::dlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -214,25 +103,95 @@ INT_PTR CALLBACK ConfigDialog::dlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARA
 
 void ConfigDialog::refreshStatus() { refreshDaemonStatus(m_hwnd); }
 
+// ===================== Preview =====================
+
+void ConfigDialog::updatePreviewCursor() {
+    if (m_hCurPreview) { DestroyCursor(m_hCurPreview); m_hCurPreview = nullptr; }
+
+    bool enabled = IsDlgButtonChecked(m_hwnd, IDC_CHECK_HIGHLIGHT) == BST_CHECKED;
+    bool useFile = IsDlgButtonChecked(m_hwnd, IDC_RADIO_FILE) == BST_CHECKED;
+
+    BOOL tr; int size = (int)GetDlgItemInt(m_hwnd, IDC_EDIT_HIGHLIGHT_SIZE, &tr, FALSE);
+    if (!tr || size < 24) size = 48;
+
+    if (!enabled) {
+        m_hCurPreview = CopyCursor(LoadCursor(nullptr, IDC_ARROW));
+    } else if (useFile) {
+        if (!m_working.highlightCustomFile.empty()) {
+            std::wstring wf(m_working.highlightCustomFile.begin(), m_working.highlightCustomFile.end());
+            m_hCurPreview = (HCURSOR)LoadImageW(nullptr, wf.c_str(), IMAGE_CURSOR, size, size, LR_LOADFROMFILE);
+        }
+        if (!m_hCurPreview) m_hCurPreview = CopyCursor(LoadCursor(nullptr, IDC_ARROW));
+    } else {
+        HWND hCombo = GetDlgItem(m_hwnd, IDC_COMBO_SHAPE);
+        int si = (int)SendMessageW(hCombo, CB_GETCURSEL, 0, 0);
+        const char* keys[] = { "circle", "square", "diamond", "arrow", "cross", "custom" };
+        std::string shape = (si >= 0 && si < 6) ? keys[si] : "circle";
+        m_hCurPreview = MouseController::createColorCursor(size, shape, m_working.highlightColor);
+    }
+    if (!m_hCurPreview) m_hCurPreview = CopyCursor(LoadCursor(nullptr, IDC_ARROW));
+
+    HWND hCanvas = GetDlgItem(m_hwnd, IDC_CANVAS_PREVIEW);
+    if (hCanvas) {
+        SetPropW(hCanvas, L"CURSOR", (HANDLE)m_hCurPreview);
+        InvalidateRect(hCanvas, nullptr, TRUE);
+    }
+}
+
+void ConfigDialog::updateHighlightControls(HWND hwnd) {
+    bool enabled = IsDlgButtonChecked(hwnd, IDC_CHECK_HIGHLIGHT) == BST_CHECKED;
+    bool useFile = IsDlgButtonChecked(hwnd, IDC_RADIO_FILE) == BST_CHECKED;
+    EnableWindow(GetDlgItem(hwnd, IDC_COMBO_SHAPE), enabled && !useFile);
+    EnableWindow(GetDlgItem(hwnd, IDC_BTN_COLOR), enabled && !useFile);
+    EnableWindow(GetDlgItem(hwnd, IDC_EDIT_HIGHLIGHT_SIZE), enabled);
+    EnableWindow(GetDlgItem(hwnd, IDC_SPIN_HIGHLIGHT_SIZE), enabled);
+    EnableWindow(GetDlgItem(hwnd, IDC_RADIO_CONFIG), enabled);
+    EnableWindow(GetDlgItem(hwnd, IDC_RADIO_FILE), enabled);
+    EnableWindow(GetDlgItem(hwnd, IDC_BTN_BROWSE_CUR), enabled && useFile);
+}
+
+void ConfigDialog::onBrowseCustomCursor(HWND hwnd) {
+    wchar_t file[MAX_PATH] = {};
+    OPENFILENAMEW ofn = { sizeof(ofn) };
+    ofn.hwndOwner = hwnd;
+    ofn.lpstrFilter = L"Cursor Files (*.cur;*.ani)\0*.cur;*.ani\0All Files (*.*)\0*.*\0";
+    ofn.lpstrFile = file; ofn.nMaxFile = MAX_PATH;
+    ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
+    if (GetOpenFileNameW(&ofn)) {
+        int len = WideCharToMultiByte(CP_UTF8, 0, file, -1, nullptr, 0, nullptr, nullptr);
+        if (len > 1) { std::string s(len-1,'\0'); WideCharToMultiByte(CP_UTF8, 0, file, -1, s.data(), len, nullptr, nullptr); m_working.highlightCustomFile = s; }
+        updatePreviewCursor();
+    }
+}
+
+void ConfigDialog::onChooseColor(HWND hwnd) {
+    static COLORREF s_custom[16] = {};
+    CHOOSECOLORW cc = { sizeof(cc) };
+    cc.hwndOwner = hwnd;
+    cc.rgbResult = m_working.highlightColor;
+    cc.lpCustColors = s_custom;
+    cc.Flags = CC_RGBINIT | CC_FULLOPEN;
+    if (ChooseColorW(&cc)) {
+        m_working.highlightColor = (int)cc.rgbResult;
+        updatePreviewCursor();
+    }
+}
+
 // ===================== Init =====================
 
 void ConfigDialog::onInit(HWND hwnd) {
     const auto& cfg = m_working;
 
-    // Subclass canvas controls for reliable painting
-    HWND hCanvas1 = GetDlgItem(hwnd, IDC_CANVAS_CURRENT);
-    HWND hCanvas2 = GetDlgItem(hwnd, IDC_CANVAS_PREVIEW);
-    SetWindowLongPtrW(hCanvas1, GWLP_WNDPROC, (LONG_PTR)CanvasProc);
-    SetWindowLongPtrW(hCanvas2, GWLP_WNDPROC, (LONG_PTR)CanvasProc);
-
+    // Core behavior
     CheckRadioButton(hwnd, IDC_RADIO_ALT_TAB, IDC_RADIO_ANY,
         cfg.triggerMode == "any_focus_change" ? IDC_RADIO_ANY : IDC_RADIO_ALT_TAB);
     CheckRadioButton(hwnd, IDC_RADIO_INSTANT, IDC_RADIO_SMOOTH,
         cfg.mouseMode == "smooth" ? IDC_RADIO_SMOOTH : IDC_RADIO_INSTANT);
     SetDlgItemInt(hwnd, IDC_EDIT_DURATION, cfg.smoothDurationMs, FALSE);
     SendDlgItemMessageW(hwnd, IDC_SPIN_DURATION, UDM_SETRANGE32, 50, 600);
-    EnableWindow(GetDlgItem(hwnd, IDC_EDIT_DURATION), cfg.mouseMode == "smooth");
-    EnableWindow(GetDlgItem(hwnd, IDC_SPIN_DURATION), cfg.mouseMode == "smooth");
+    BOOL smooth = cfg.mouseMode == "smooth";
+    EnableWindow(GetDlgItem(hwnd, IDC_EDIT_DURATION), smooth);
+    EnableWindow(GetDlgItem(hwnd, IDC_SPIN_DURATION), smooth);
     SetDlgItemInt(hwnd, IDC_EDIT_DELAY, cfg.moveDelayMs, FALSE);
     SendDlgItemMessageW(hwnd, IDC_SPIN_DELAY, UDM_SETRANGE32, 0, 2000);
     CheckRadioButton(hwnd, IDC_RADIO_WINDOW, IDC_RADIO_CLIENT,
@@ -246,58 +205,50 @@ void ConfigDialog::onInit(HWND hwnd) {
 
     // Shape combo
     HWND shapeCombo = GetDlgItem(hwnd, IDC_COMBO_SHAPE);
-    const wchar_t* shapeNames[] = { L"圆形", L"方形", L"菱形", L"箭头", L"十字", L"自定义文件" };
-    const char*    shapeKeys[]  = { "circle", "square", "diamond", "arrow", "cross", "custom" };
-    for (int i = 0; i < 6; ++i) {
-        int idx = (int)SendMessageW(shapeCombo, CB_ADDSTRING, 0, (LPARAM)shapeNames[i]);
-        SendMessageW(shapeCombo, CB_SETITEMDATA, idx, i);
+    if (shapeCombo) {
+        const wchar_t* names[] = { L"圆形", L"方形", L"菱形", L"箭头", L"十字", L"自定义文件" };
+        const char*    keys[]  = { "circle","square","diamond","arrow","cross","custom" };
+        for (int i = 0; i < 6; ++i)
+            SendMessageW(shapeCombo, CB_ADDSTRING, 0, (LPARAM)names[i]);
+        int sel = 0;
+        for (int i = 0; i < 6; ++i) { if (cfg.highlightShape == keys[i]) { sel = i; break; } }
+        SendMessageW(shapeCombo, CB_SETCURSEL, sel, 0);
     }
-    int shapeSel = 0;
-    for (int i = 0; i < 6; ++i) { if (cfg.highlightShape == shapeKeys[i]) { shapeSel = i; break; } }
-    SendMessageW(shapeCombo, CB_SETCURSEL, shapeSel, 0);
 
-    // Color combo
-    HWND colorCombo = GetDlgItem(hwnd, IDC_COMBO_COLOR);
-    const wchar_t* colorNames[] = { L"黄色", L"红色", L"绿色", L"蓝色", L"洋红", L"青色", L"白色" };
-    COLORREF colorVals[] = { RGB(255,255,0), RGB(255,0,0), RGB(0,255,0),
-        RGB(0,128,255), RGB(255,0,255), RGB(0,255,255), RGB(255,255,255) };
-    for (int i = 0; i < 7; ++i) {
-        int idx = (int)SendMessageW(colorCombo, CB_ADDSTRING, 0, (LPARAM)colorNames[i]);
-        SendMessageW(colorCombo, CB_SETITEMDATA, idx, (LPARAM)colorVals[i]);
-    }
-    int colorSel = 0;
-    for (int i = 0; i < 7; ++i) { if (cfg.highlightColor == (int)colorVals[i]) { colorSel = i; break; } }
-    SendMessageW(colorCombo, CB_SETCURSEL, colorSel, 0);
+    // Radio toggle: config vs file
+    bool isCustomFile = (cfg.highlightShape == "custom" && !cfg.highlightCustomFile.empty());
+    CheckRadioButton(hwnd, IDC_RADIO_CONFIG, IDC_RADIO_FILE,
+        isCustomFile ? IDC_RADIO_FILE : IDC_RADIO_CONFIG);
+
+    updateHighlightControls(hwnd);
 
     // Excluded processes
     HWND list = GetDlgItem(hwnd, IDC_LIST_EXCLUDE);
     for (auto& p : cfg.excludedProcesses) {
         std::wstring w(p.begin(), p.end());
-        SendMessageW(list, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(w.c_str()));
+        SendMessageW(list, LB_ADDSTRING, 0, (LPARAM)w.c_str());
     }
 
-    // Log
+    // Log combo
     HWND combo = GetDlgItem(hwnd, IDC_COMBO_LOG);
     const wchar_t* logNames[] = { L"无", L"错误", L"警告", L"信息", L"调试" };
     for (int i = 0; i < 5; ++i) SendMessageW(combo, CB_ADDSTRING, 0, (LPARAM)logNames[i]);
-    int sel = 0;
-    if (cfg.logLevel == "error") sel = 1; else if (cfg.logLevel == "warn") sel = 2;
-    else if (cfg.logLevel == "info") sel = 3; else if (cfg.logLevel == "debug") sel = 4;
-    SendMessageW(combo, CB_SETCURSEL, sel, 0);
+    int lsel = 0;
+    if (cfg.logLevel == "error") lsel = 1; else if (cfg.logLevel == "warn") lsel = 2;
+    else if (cfg.logLevel == "info") lsel = 3; else if (cfg.logLevel == "debug") lsel = 4;
+    SendMessageW(combo, CB_SETCURSEL, lsel, 0);
 
     DaemonController dc;
     CheckDlgButton(hwnd, IDC_CHECK_AUTOSTART, dc.isAutoStart() ? BST_CHECKED : BST_UNCHECKED);
     refreshDaemonStatus(hwnd);
 
-    // Canvas: capture current cursor and initial preview
+    // Current cursor canvas
     if (m_hCurCurrent) DestroyCursor(m_hCurCurrent);
     m_hCurCurrent = CopyCursor(LoadCursor(nullptr, IDC_ARROW));
-    SetPropW(hCanvas1, L"CURSOR", (HANDLE)m_hCurCurrent);
+    HWND hCurCanvas = GetDlgItem(hwnd, IDC_CANVAS_CURRENT);
+    if (hCurCanvas) SetPropW(hCurCanvas, L"CURSOR", (HANDLE)m_hCurCurrent);
 
     updatePreviewCursor();
-    // Ensure preview canvas property set
-    HWND hPrev = GetDlgItem(hwnd, IDC_CANVAS_PREVIEW);
-    if (hPrev && m_hCurPreview) SetPropW(hPrev, L"CURSOR", (HANDLE)m_hCurPreview);
 }
 
 void ConfigDialog::refreshDaemonStatus(HWND hwnd) {
@@ -310,27 +261,26 @@ void ConfigDialog::refreshDaemonStatus(HWND hwnd) {
 // ===================== Collect & Save =====================
 
 void ConfigDialog::collectValues(HWND hwnd) {
-    BOOL translated;
+    BOOL tr;
     m_working.triggerMode = IsDlgButtonChecked(hwnd, IDC_RADIO_ANY) == BST_CHECKED ? "any_focus_change" : "alt_tab_only";
     m_working.mouseMode = IsDlgButtonChecked(hwnd, IDC_RADIO_SMOOTH) == BST_CHECKED ? "smooth" : "instant";
-    int dur = GetDlgItemInt(hwnd, IDC_EDIT_DURATION, &translated, FALSE);
-    if (translated) { if (dur < 50) dur = 50; if (dur > 600) dur = 600; m_working.smoothDurationMs = dur; }
-    int delay = GetDlgItemInt(hwnd, IDC_EDIT_DELAY, &translated, FALSE);
-    if (translated) { if (delay < 0) delay = 0; if (delay > 2000) delay = 2000; m_working.moveDelayMs = delay; }
+    int dur = GetDlgItemInt(hwnd, IDC_EDIT_DURATION, &tr, FALSE);
+    if (tr) { if (dur < 50) dur = 50; if (dur > 600) dur = 600; m_working.smoothDurationMs = dur; }
+    int delay = GetDlgItemInt(hwnd, IDC_EDIT_DELAY, &tr, FALSE);
+    if (tr) { if (delay < 0) delay = 0; if (delay > 2000) delay = 2000; m_working.moveDelayMs = delay; }
     m_working.targetArea = IsDlgButtonChecked(hwnd, IDC_RADIO_CLIENT) == BST_CHECKED ? "client_rect" : "window_rect";
     m_working.enabled = IsDlgButtonChecked(hwnd, IDC_CHECK_ENABLED) == BST_CHECKED;
     m_working.highlightEnabled = IsDlgButtonChecked(hwnd, IDC_CHECK_HIGHLIGHT) == BST_CHECKED;
-    int hlSize = GetDlgItemInt(hwnd, IDC_EDIT_HIGHLIGHT_SIZE, &translated, FALSE);
-    if (translated) { if (hlSize < 24) hlSize = 24; if (hlSize > 128) hlSize = 128; m_working.highlightSize = hlSize; }
+
+    int hlSize = GetDlgItemInt(hwnd, IDC_EDIT_HIGHLIGHT_SIZE, &tr, FALSE);
+    if (tr) { if (hlSize < 24) hlSize = 24; if (hlSize > 128) hlSize = 128; m_working.highlightSize = hlSize; }
 
     HWND shapeCombo = GetDlgItem(hwnd, IDC_COMBO_SHAPE);
     int si = (int)SendMessageW(shapeCombo, CB_GETCURSEL, 0, 0);
-    const char* shapeKeys[] = { "circle", "square", "diamond", "arrow", "cross", "custom" };
-    m_working.highlightShape = (si >= 0 && si < 6) ? shapeKeys[si] : "circle";
+    const char* keys[] = { "circle","square","diamond","arrow","cross","custom" };
+    m_working.highlightShape = (si >= 0 && si < 6) ? keys[si] : "circle";
 
-    HWND colorCombo = GetDlgItem(hwnd, IDC_COMBO_COLOR);
-    int ci = (int)SendMessageW(colorCombo, CB_GETCURSEL, 0, 0);
-    m_working.highlightColor = (ci >= 0) ? (int)(COLORREF)(INT_PTR)SendMessageW(colorCombo, CB_GETITEMDATA, ci, 0) : 0x0000FFFF;
+    // Color is already in m_working.highlightColor (set via color picker or init)
 
     m_working.excludedProcesses.clear();
     HWND list = GetDlgItem(hwnd, IDC_LIST_EXCLUDE);
@@ -338,15 +288,14 @@ void ConfigDialog::collectValues(HWND hwnd) {
     for (int i = 0; i < count; ++i) {
         int len = (int)SendMessageW(list, LB_GETTEXTLEN, i, 0);
         if (len <= 0) continue;
-        std::wstring w(len + 1, L'\0');
-        SendMessageW(list, LB_GETTEXT, i, reinterpret_cast<LPARAM>(w.data())); w.resize(len);
-        int utf8Len = WideCharToMultiByte(CP_UTF8, 0, w.c_str(), -1, nullptr, 0, nullptr, nullptr);
-        if (utf8Len > 1) { std::string utf8(utf8Len-1, '\0'); WideCharToMultiByte(CP_UTF8, 0, w.c_str(), -1, utf8.data(), utf8Len, nullptr, nullptr); m_working.excludedProcesses.push_back(utf8); }
+        std::wstring w(len+1, L'\0'); SendMessageW(list, LB_GETTEXT, i, (LPARAM)w.data()); w.resize(len);
+        int l = WideCharToMultiByte(CP_UTF8, 0, w.c_str(), -1, nullptr, 0, nullptr, nullptr);
+        if (l > 1) { std::string s(l-1,'\0'); WideCharToMultiByte(CP_UTF8, 0, w.c_str(), -1, s.data(), l, nullptr, nullptr); m_working.excludedProcesses.push_back(s); }
     }
     HWND combo = GetDlgItem(hwnd, IDC_COMBO_LOG);
     int ls = (int)SendMessageW(combo, CB_GETCURSEL, 0, 0);
-    const char* levels[] = { "none", "error", "warn", "info", "debug" };
-    m_working.logLevel = (ls >= 0 && ls < 5) ? levels[ls] : "none";
+    const char* lvls[] = { "none","error","warn","info","debug" };
+    m_working.logLevel = (ls >= 0 && ls < 5) ? lvls[ls] : "none";
 }
 
 void ConfigDialog::onSave(HWND hwnd) {
@@ -363,27 +312,23 @@ void ConfigDialog::onSave(HWND hwnd) {
 
 void ConfigDialog::onCommand(HWND hwnd, WORD id, WORD code, HWND /*ctl*/) {
     switch (id) {
-    case IDOK: onSave(hwnd); break;
+    case IDOK:  onSave(hwnd); break;
     case IDCANCEL: hideWindow(); break;
     case IDC_RADIO_SMOOTH:
-        EnableWindow(GetDlgItem(hwnd, IDC_EDIT_DURATION), TRUE);
-        EnableWindow(GetDlgItem(hwnd, IDC_SPIN_DURATION), TRUE); break;
+        EnableWindow(GetDlgItem(hwnd, IDC_EDIT_DURATION), TRUE); EnableWindow(GetDlgItem(hwnd, IDC_SPIN_DURATION), TRUE); break;
     case IDC_RADIO_INSTANT:
-        EnableWindow(GetDlgItem(hwnd, IDC_EDIT_DURATION), FALSE);
-        EnableWindow(GetDlgItem(hwnd, IDC_SPIN_DURATION), FALSE); break;
-    case IDC_BTN_ADD:    onAddExclude(hwnd);    break;
+        EnableWindow(GetDlgItem(hwnd, IDC_EDIT_DURATION), FALSE); EnableWindow(GetDlgItem(hwnd, IDC_SPIN_DURATION), FALSE); break;
+    case IDC_BTN_ADD: onAddExclude(hwnd); break;
     case IDC_BTN_REMOVE: onRemoveExclude(hwnd); break;
     case IDM_TRAY_OPEN: case IDM_TRAY_TOGGLE: case IDM_TRAY_EXIT: onTrayMenu(id); break;
     case IDC_BTN_START: { DaemonController dc; if (dc.start()) refreshDaemonStatus(hwnd);
-        else MessageBoxW(hwnd, L"无法启动守护进程。\n\n请确保 mouse_focus_daemon.exe 与本程序在同一目录。", L"启动失败", MB_OK | MB_ICONWARNING); break; }
+        else MessageBoxW(hwnd, L"无法启动守护进程。", L"错误", MB_OK | MB_ICONWARNING); break; }
     case IDC_BTN_STOP: { DaemonController dc; dc.stop(); Sleep(300); refreshDaemonStatus(hwnd); break; }
-    case IDC_CHECK_HIGHLIGHT:
-    case IDC_EDIT_HIGHLIGHT_SIZE:
-        if (code == EN_CHANGE || id == IDC_CHECK_HIGHLIGHT) updatePreviewCursor(); break;
-    case IDC_COMBO_SHAPE:
-        if (code == CBN_SELCHANGE) updatePreviewCursor(); break;
-    case IDC_COMBO_COLOR:
-        if (code == CBN_SELCHANGE) updatePreviewCursor(); break;
+    case IDC_CHECK_HIGHLIGHT: updateHighlightControls(hwnd); updatePreviewCursor(); break;
+    case IDC_RADIO_CONFIG: case IDC_RADIO_FILE: updateHighlightControls(hwnd); updatePreviewCursor(); break;
+    case IDC_COMBO_SHAPE: if (code == CBN_SELCHANGE) updatePreviewCursor(); break;
+    case IDC_EDIT_HIGHLIGHT_SIZE: if (code == EN_CHANGE) updatePreviewCursor(); break;
+    case IDC_BTN_COLOR: onChooseColor(hwnd); break;
     case IDC_BTN_BROWSE_CUR: onBrowseCustomCursor(hwnd); break;
     }
 }
@@ -395,8 +340,8 @@ void ConfigDialog::onAddExclude(HWND hwnd) {
             HWND list = GetDlgItem(hwnd, IDC_LIST_EXCLUDE);
             int count = (int)SendMessageW(list, LB_GETCOUNT, 0, 0); bool dup = false;
             for (int i = 0; i < count; ++i) {
-                wchar_t existing[256] = {}; SendMessageW(list, LB_GETTEXT, i, (LPARAM)existing);
-                if (_wcsicmp(existing, buf) == 0) { dup = true; break; }
+                wchar_t e[256] = {}; SendMessageW(list, LB_GETTEXT, i, (LPARAM)e);
+                if (_wcsicmp(e, buf) == 0) { dup = true; break; }
             }
             if (!dup) SendMessageW(list, LB_ADDSTRING, 0, (LPARAM)buf);
         }
@@ -407,7 +352,6 @@ void ConfigDialog::onRemoveExclude(HWND hwnd) {
     int sel = (int)SendMessageW(list, LB_GETCURSEL, 0, 0);
     if (sel != LB_ERR) SendMessageW(list, LB_DELETESTRING, sel, 0);
 }
-
 static INT_PTR CALLBACK inputDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     static wchar_t* outBuf = nullptr;
     if (msg == WM_INITDIALOG) { outBuf = (wchar_t*)lParam; SetFocus(GetDlgItem(hwnd, IDC_INPUT_TEXT)); return FALSE; }

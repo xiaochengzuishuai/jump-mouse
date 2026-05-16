@@ -28,16 +28,15 @@ private:
     NOTIFYICONDATAW m_nid = {};
     HMENU m_trayMenu = nullptr;
 
-    // Canvas cursors
-    HCURSOR m_hCurCurrent = nullptr;  // display copy of current system cursor
-    HCURSOR m_hCurPreview = nullptr;  // generated preview cursor
+    HCURSOR m_hCurCurrent = nullptr;
+    HCURSOR m_hCurPreview = nullptr;
 
     void createTrayIcon();
     void updateTrayMenu();
     void removeTrayIcon();
     void showTrayMenu();
-
     void updatePreviewCursor();
+    void updateHighlightControls(HWND hwnd);
 
     static INT_PTR CALLBACK dlgProc(HWND, UINT, WPARAM, LPARAM);
     void onInit(HWND hwnd);
@@ -48,7 +47,7 @@ private:
     void onAddExclude(HWND hwnd);
     void onRemoveExclude(HWND hwnd);
     void onBrowseCustomCursor(HWND hwnd);
+    void onChooseColor(HWND hwnd);
     void collectValues(HWND hwnd);
     void refreshDaemonStatus(HWND hwnd);
-    void onDrawItem(HWND hwnd, WPARAM wParam, LPARAM lParam);
 };
