@@ -1,32 +1,51 @@
-E:\玩转ai\cc_project\鼠标聚焦脚本> cmake --build build --config Release
+E:\玩转ai\cc_project\鼠标聚焦脚本>cmake --build build --config Release
 适用于 .NET Framework MSBuild 版本 18.6.3+84d3e95b4
 
-  mouse_focus_config.vcxproj -> E:\玩转ai\cc_project\鼠标聚焦脚本\build\Release\mouse_focus_config.exe
-  mouse_controller.cpp
-E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(96,9): error C2664: “HCURSOR LoadCursorW(HINSTANCE,LPCWSTR)”:
- 无法将参数 2 从“LPSTR”转换为“LPCWSTR” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_daemon.vcxproj]
-      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(96,30):
+  config_dialog.cpp
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(70,25): error C2664: “HICON LoadIconW(HINSTANCE,LPCWSTR)”:
+无法将参数 2 从“LPSTR”转换为“LPCWSTR” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(70,44):
       指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
-      E:\Windows Kits\10\Include\10.0.26100.0\um\winuser.h(10618,1):
-      参见“LoadCursorW”的声明
-      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(96,9):
+      E:\Windows Kits\10\Include\10.0.26100.0\um\winuser.h(10749,1):
+      参见“LoadIconW”的声明
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(70,25):
       尝试匹配参数列表“(nullptr, LPSTR)”时
 
-E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(110,32): error C2065: “OCR_NORMAL”: 未声明的标识符 [E:\玩转ai\cc_proje
-ct\鼠标聚焦脚本\build\mouse_focus_daemon.vcxproj]
-E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(149,39): error C2065: “OCR_NORMAL”: 未声明的标识符 [E:\玩转ai\cc_proje
-ct\鼠标聚焦脚本\build\mouse_focus_daemon.vcxproj]
-  mouse_controller.cpp
-E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(96,9): error C2664: “HCURSOR LoadCursorW(HINSTANCE,LPCWSTR)”:
- 无法将参数 2 从“LPSTR”转换为“LPCWSTR” [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_test.vcxproj]
-      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(96,30):
-      指向的类型不相关; 转换需要 reinterpret_cast、C 样式强制转换或带圆括号的函数样式强制转换
-      E:\Windows Kits\10\Include\10.0.26100.0\um\winuser.h(10618,1):
-      参见“LoadCursorW”的声明
-      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(96,9):
-      尝试匹配参数列表“(nullptr, LPSTR)”时
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(485,13): error C2660: “GetMessageW”: 函数不接受 0 个参数 [E:\玩转ai\c
+c_project\鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
+      E:\Windows Kits\10\Include\10.0.26100.0\um\winuser.h(3414,1):
+      参见“GetMessageW”的声明
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(485,13):
+      尝试匹配参数列表“()”时
 
-E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(110,32): error C2065: “OCR_NORMAL”: 未声明的标识符 [E:\玩转ai\cc_proje
-ct\鼠标聚焦脚本\build\mouse_focus_test.vcxproj]
-E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(149,39): error C2065: “OCR_NORMAL”: 未声明的标识符 [E:\玩转ai\cc_proje
-ct\鼠标聚焦脚本\build\mouse_focus_test.vcxproj]
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(491,13): error C2660: “GetMessageW”: 函数不接受 0 个参数 [E:\玩转ai\c
+c_project\鼠标聚焦脚本\build\mouse_focus_config.vcxproj]
+      E:\Windows Kits\10\Include\10.0.26100.0\um\winuser.h(3414,1):
+      参见“GetMessageW”的声明
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\config_tool\config_dialog.cpp(491,13):
+      尝试匹配参数列表“()”时
+
+  daemon_main.cpp
+  application.cpp
+  trigger_detector.cpp
+  mouse_controller.cpp
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(118,29): error C2248: “MouseController::createColorCursor”: 无
+法访问 private 成员(在“MouseController”类中声明) [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_daemon.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(74,26):
+      参见“MouseController::createColorCursor”的声明
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.h(9,7):
+      参见“MouseController”的声明
+
+  config_manager.cpp
+  正在生成代码...
+  config_manager.cpp
+  mouse_controller.cpp
+E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(118,29): error C2248: “MouseController::createColorCursor”: 无
+法访问 private 成员(在“MouseController”类中声明) [E:\玩转ai\cc_project\鼠标聚焦脚本\build\mouse_focus_test.vcxproj]
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.cpp(74,26):
+      参见“MouseController::createColorCursor”的声明
+      E:\玩转ai\cc_project\鼠标聚焦脚本\src\daemon\mouse_controller.h(9,7):
+      参见“MouseController”的声明
+
+  test_harness.cpp
+  正在生成代码...

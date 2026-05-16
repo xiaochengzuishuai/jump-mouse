@@ -28,6 +28,8 @@ public:
     bool pollHighlightRestore();
     void forceRestoreCursor();
 
+    static HCURSOR createColorCursor(int size, const std::string& shape, COLORREF rgb);
+
     ~MouseController() { forceRestoreCursor(); }
 
 private:
@@ -47,7 +49,6 @@ private:
     POINT m_highlightPos = {};
     HCURSOR m_originalCursor = nullptr;
 
-    static HCURSOR createColorCursor(int size, const std::string& shape, COLORREF rgb);
     static void setBit(std::vector<BYTE>& plane, int stride, int x, int y, bool on);
 };
 

@@ -67,7 +67,7 @@ void ConfigDialog::createTrayIcon() {
         int cx = GetSystemMetrics(SM_CXSMICON), cy = GetSystemMetrics(SM_CYSMICON);
         hIcon = (HICON)LoadImageW(nullptr, iconPath.c_str(), IMAGE_ICON, cx, cy, LR_LOADFROMFILE);
     }
-    if (!hIcon) hIcon = LoadIconW(nullptr, IDI_APPLICATION);
+    if (!hIcon) hIcon = LoadIcon(nullptr, IDI_APPLICATION);
 
     m_nid = { sizeof(NOTIFYICONDATAW) };
     m_nid.hWnd = m_hwnd; m_nid.uID = UID_TRAY;
@@ -218,7 +218,7 @@ INT_PTR CALLBACK ConfigDialog::dlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARA
 
     switch (msg) {
     case WM_COMMAND:
-        self->onCommand(hwnd, LOWORD(wParam), HIWORD(wParam), reinterpret_cast<HWND>(lParam));
+        self->onCommand(hwnd, LOWORD(wParam), HIWORD(wParam), (HWND)lParam);
         return TRUE;
     case WM_DRAWITEM:
         self->onDrawItem(hwnd, wParam, lParam);
@@ -444,7 +444,7 @@ void ConfigDialog::onSave(HWND hwnd) {
 
 // ===================== Commands =====================
 
-void ConfigDialog::onCommand(HWND hwnd, WORD id, WORD /*code*/, HWND /*ctl*/) {
+void ConfigDialog::onCommand(HWND hwnd, WORD id, WORD code, HWND /*ctl*/) {
     switch (id) {
     case IDOK:  onSave(hwnd); break;
     case IDCANCEL: hideWindow(); break;
@@ -482,13 +482,13 @@ void ConfigDialog::onCommand(HWND hwnd, WORD id, WORD /*code*/, HWND /*ctl*/) {
     // Highlight live preview updates
     case IDC_CHECK_HIGHLIGHT:
     case IDC_EDIT_HIGHLIGHT_SIZE:
-        if (HIWORD(GetMessageW()) == EN_CHANGE || id == IDC_CHECK_HIGHLIGHT)
+        if (code == EN_CHANGE || id == IDC_CHECK_HIGHLIGHT)
             updatePreviewCursor();
         break;
 
     case IDC_COMBO_SHAPE:
     case IDC_COMBO_COLOR:
-        if (HIWORD(GetMessageW()) == CBN_SELCHANGE)
+        if (code == CBN_SELCHANGE)
             updatePreviewCursor();
         break;
 
