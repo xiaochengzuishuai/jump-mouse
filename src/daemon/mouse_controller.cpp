@@ -176,7 +176,10 @@ bool MouseController::applyHighlight() {
 
     // 1. Backup current Arrow value (user's actual cursor, not system default)
     m_originalArrowPath = registryCursorPath(L"Arrow");
-    LOG_DEBUG(std::format("  Original Arrow = {}", std::string(m_originalArrowPath.begin(), m_originalArrowPath.end())));
+    int len = WideCharToMultiByte(CP_UTF8, 0, m_originalArrowPath.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    std::string arrowPathUtf8(len > 1 ? len-1 : 0, '\0');
+    if (len > 1) WideCharToMultiByte(CP_UTF8, 0, m_originalArrowPath.c_str(), -1, &arrowPathUtf8[0], len, nullptr, nullptr);
+    LOG_DEBUG(std::format("  Original Arrow = {}", arrowPathUtf8));
 
     // 2. Determine new cursor path
     std::wstring newPath;

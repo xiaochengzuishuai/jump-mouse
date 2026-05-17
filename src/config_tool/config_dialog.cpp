@@ -90,6 +90,23 @@ INT_PTR CALLBACK ConfigDialog::dlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARA
         return TRUE;
     case WM_TIMER:
         if (wParam == 999) { KillTimer(hwnd, 999); self->refreshDaemonStatus(hwnd); }
+        if (wParam == 777) {
+            KillTimer(hwnd, 777);
+            // Deferred shape combo population
+            HWND sc = GetDlgItem(hwnd, IDC_COMBO_SHAPE);
+            if (sc && SendMessageW(sc, CB_GETCOUNT, 0, 0) == 0) {
+                const wchar_t* names[] = {
+                    L"标准选择(箭头)", L"链接选择(手型)", L"文本选择(I型)",
+                    L"精确选择(十字)",   L"移动(四向)",     L"忙碌(等待)",
+                    L"圆形彩色",         L"方形彩色"
+                };
+                for (int i = 0; i < 8; ++i) SendMessageW(sc, CB_ADDSTRING, 0, (LPARAM)names[i]);
+                const char* keys[] = { "arrow","hand","ibeam","cross","sizeall","wait","circle","square" };
+                int s = 0;
+                for (int i = 0; i < 8; ++i) { if (self->m_working.highlightShape == keys[i]) { s = i; break; } }
+                SendMessageW(sc, CB_SETCURSEL, s, 0);
+            }
+        }
         return TRUE;
     case WM_TRAYICON:
         if (LOWORD(lParam) == WM_LBUTTONUP) IsWindowVisible(hwnd) ? self->hideWindow() : self->showWindow();
@@ -297,7 +314,12 @@ void ConfigDialog::onInit(HWND hwnd) {
         int sel = 0;
         for (int i = 0; i < 8; ++i) { if (cfg.highlightShape == keys[i]) { sel = i; break; } }
         SendMessageW(shapeCombo, CB_SETCURSEL, sel, 0);
+        // Force dropdown to show: set a reasonable visible count
+        SendMessageW(shapeCombo, CB_SETMINVISIBLE, 5, 0);
     }
+
+    // Deferred repopulation via timer (handles timing issues during dialog creation)
+    SetTimer(hwnd, 777, 80, nullptr);
 
     // Radio toggle: config vs file (determined by presence of custom file)
     bool hasCustomFile = !cfg.highlightCustomFile.empty();
