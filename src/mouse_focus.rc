@@ -18,7 +18,6 @@ CAPTION "Mouse Focus — 设置"
 FONT 9, "Segoe UI"
 {
     GROUPBOX        "核心行为", IDC_STATIC, 10, 8, 410, 110
-
     CONTROL         "仅 Alt+Tab 切换", IDC_RADIO_ALT_TAB, "Button",
                     BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP, 22, 24, 130, 14
     CONTROL         "任意窗口聚焦变化", IDC_RADIO_ANY, "Button",
@@ -27,12 +26,11 @@ FONT 9, "Segoe UI"
                     BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP, 22, 44, 80, 14
     CONTROL         "平滑动画", IDC_RADIO_SMOOTH, "Button",
                     BS_AUTORADIOBUTTON | WS_TABSTOP, 110, 44, 80, 14
-    LTEXT           "时长:", IDC_STATIC, 200, 46, 30, 12
-    EDITTEXT        IDC_EDIT_DURATION, 230, 44, 40, 14, ES_NUMBER | WS_TABSTOP
+    LTEXT           "时长/延迟 ms", IDC_STATIC, 200, 46, 70, 12
+    EDITTEXT        IDC_EDIT_DURATION, 270, 44, 40, 14, ES_NUMBER | WS_TABSTOP
     CONTROL         "", IDC_SPIN_DURATION, "msctls_updown32",
                     UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ALIGNRIGHT | UDS_ARROWKEYS, 0, 0, 0, 0
-    LTEXT           "延迟:", IDC_STATIC, 280, 46, 30, 12
-    EDITTEXT        IDC_EDIT_DELAY, 310, 44, 40, 14, ES_NUMBER | WS_TABSTOP
+    EDITTEXT        IDC_EDIT_DELAY, 320, 44, 40, 14, ES_NUMBER | WS_TABSTOP
     CONTROL         "", IDC_SPIN_DELAY, "msctls_updown32",
                     UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ALIGNRIGHT | UDS_ARROWKEYS, 0, 0, 0, 0
     CONTROL         "窗口中心（含标题栏）", IDC_RADIO_WINDOW, "Button",
@@ -42,31 +40,25 @@ FONT 9, "Segoe UI"
     CONTROL         "启用服务", IDC_CHECK_ENABLED, "Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP, 22, 88, 80, 14
 
-    // 移动后临时变更 — placed at y=126 (ends at 8+110=118, gap=8)
+    // ── 移动后临时变更 ──
     GROUPBOX        "移动后临时变更", IDC_STATIC, 10, 126, 410, 152
     CONTROL         "启用", IDC_CHECK_HIGHLIGHT, "Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP, 22, 142, 45, 14
 
-    // Canvas labels
     LTEXT           "当前光标", IDC_STATIC, 22, 162, 68, 12
-    LTEXT           "预览", IDC_STATIC, 108, 162, 68, 12
-
-    // Canvas placeholders — subclasses in onInit
     CONTROL         "", IDC_CANVAS_CURRENT, "Static", SS_BITMAP | WS_BORDER, 22, 176, 68, 68
+    LTEXT           "预览", IDC_STATIC, 108, 162, 68, 12
     CONTROL         "", IDC_CANVAS_PREVIEW, "Static", SS_BITMAP | WS_BORDER, 108, 176, 68, 68
 
-    // Shape/color/size — created dynamically in onInit from pixel coords
-    // Placeholders (hidden): labels at fixed DLU positions
-    LTEXT           "形状:", IDC_STATIC, 195, 170, 88, 12
-    LTEXT           "大小:", IDC_STATIC, 320, 170, 88, 12
-    LTEXT           "颜色:", IDC_STATIC, 195, 192, 88, 12
-
-    // Size edit (only one kept in template since it needs spin buddy)
-    EDITTEXT        IDC_EDIT_HIGHLIGHT_SIZE, 348, 168, 36, 14, ES_NUMBER | WS_TABSTOP
+    LTEXT           "形状", IDC_STATIC, 195, 170, 28, 12
+    COMBOBOX        IDC_COMBO_SHAPE, 225, 168, 95, 120, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "大小", IDC_STATIC, 330, 170, 28, 12
+    EDITTEXT        IDC_EDIT_HIGHLIGHT_SIZE, 358, 168, 40, 14, ES_NUMBER | WS_TABSTOP
     CONTROL         "", IDC_SPIN_HIGHLIGHT_SIZE, "msctls_updown32",
                     UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ALIGNRIGHT | UDS_ARROWKEYS, 0, 0, 0, 0
 
-    // Radio toggle
+    PUSHBUTTON      "颜色...", IDC_BTN_COLOR, 195, 192, 60, 14
+
     CONTROL         "个性化配置", IDC_RADIO_CONFIG, "Button",
                     BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP, 195, 214, 80, 14
     CONTROL         "导入文件", IDC_RADIO_FILE, "Button",

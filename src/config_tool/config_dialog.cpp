@@ -307,38 +307,20 @@ void ConfigDialog::onInit(HWND hwnd) {
     SetWindowLongPtrW(GetDlgItem(hwnd, IDC_CANVAS_CURRENT), GWLP_WNDPROC, (LONG_PTR)CanvasSubclassProc);
     SetWindowLongPtrW(GetDlgItem(hwnd, IDC_CANVAS_PREVIEW), GWLP_WNDPROC, (LONG_PTR)CanvasSubclassProc);
 
-    // Dynamically create shape combo and color button (bypass .rc template issues)
-    // Convert DLU to pixels using dialog base units
-    LONG base = GetDialogBaseUnits();
-    int baseX = LOWORD(base), baseY = HIWORD(base);
-    auto dlu2px = [=](int x, int y) { return MulDiv(x, baseX, 4); };
-    auto dlu2py = [=](int x, int y) { return MulDiv(y, baseY, 8); };
-
-    HWND hShapeCombo = CreateWindowExW(0, L"COMBOBOX", nullptr,
-        WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP,
-        dlu2px(210,0), dlu2py(0,164), dlu2px(95,0), dlu2py(0,200),
-        hwnd, (HMENU)(UINT_PTR)IDC_COMBO_SHAPE, m_hInstance, nullptr);
-    if (hShapeCombo) {
-        SendMessageW(hShapeCombo, WM_SETFONT, (WPARAM)SendMessageW(hwnd, WM_GETFONT, 0, 0), TRUE);
+    // Shape combo — populate from .rc template control
+    HWND shapeCombo = GetDlgItem(hwnd, IDC_COMBO_SHAPE);
+    if (shapeCombo) {
         const wchar_t* names[] = {
             L"标准选择(箭头)", L"链接选择(手型)", L"文本选择(I型)",
             L"精确选择(十字)",   L"移动(四向)",     L"忙碌(等待)",
             L"圆形彩色",         L"方形彩色"
         };
         const char* keys[] = { "arrow","hand","ibeam","cross","sizeall","wait","circle","square" };
-        for (int i = 0; i < 8; ++i) SendMessageW(hShapeCombo, CB_ADDSTRING, 0, (LPARAM)names[i]);
+        for (int i = 0; i < 8; ++i) SendMessageW(shapeCombo, CB_ADDSTRING, 0, (LPARAM)names[i]);
         int sel = 0;
         for (int i = 0; i < 8; ++i) { if (cfg.highlightShape == keys[i]) { sel = i; break; } }
-        SendMessageW(hShapeCombo, CB_SETCURSEL, sel, 0);
-        SendMessageW(hShapeCombo, CB_SETMINVISIBLE, 5, 0);
-    }
-
-    HWND hColorBtn = CreateWindowExW(0, L"BUTTON", L"颜色...",
-        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP,
-        dlu2px(210,0), dlu2py(0,190), dlu2px(60,0), dlu2py(0,14),
-        hwnd, (HMENU)(UINT_PTR)IDC_BTN_COLOR, m_hInstance, nullptr);
-    if (hColorBtn) {
-        SendMessageW(hColorBtn, WM_SETFONT, (WPARAM)SendMessageW(hwnd, WM_GETFONT, 0, 0), TRUE);
+        SendMessageW(shapeCombo, CB_SETCURSEL, sel, 0);
+        SendMessageW(shapeCombo, CB_SETMINVISIBLE, 5, 0);
     }
 
     // Radio toggle: config vs file (determined by presence of custom file)
