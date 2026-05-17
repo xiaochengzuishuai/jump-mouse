@@ -181,6 +181,60 @@ void ConfigDialog::onBrowseCustomCursor(HWND hwnd) {
     }
 }
 
+void ConfigDialog::onRefreshHighlight(HWND hwnd) {
+    // Reload config from disk and update UI + preview
+    m_config.load(m_configPath);
+    m_working = m_config.get();
+
+    // Update controls from reloaded config
+    CheckDlgButton(hwnd, IDC_CHECK_HIGHLIGHT, m_working.highlightEnabled ? BST_CHECKED : BST_UNCHECKED);
+    SetDlgItemInt(hwnd, IDC_EDIT_HIGHLIGHT_SIZE, m_working.highlightSize, FALSE);
+
+    HWND shapeCombo = GetDlgItem(hwnd, IDC_COMBO_SHAPE);
+    if (shapeCombo) {
+        if (SendMessageW(shapeCombo, CB_GETCOUNT, 0, 0) == 0) {
+            // Combo was empty — repopulate
+            const wchar_t* names[] = {
+                L"标准选择(箭头)", L"链接选择(手型)", L"文本选择(I型)",
+                L"精确选择(十字)",   L"移动(四向)",     L"忙碌(等待)",
+                L"圆形彩色",         L"方形彩色"
+            };
+            const char* keys[] = { "arrow","hand","ibeam","cross","sizeall","wait","circle","square" };
+            for (int i = 0; i < 8; ++i)
+                SendMessageW(shapeCombo, CB_ADDSTRING, 0, (LPARAM)names[i]);
+            int sel = 0;
+            for (int i = 0; i < 8; ++i) { if (m_working.highlightShape == keys[i]) { sel = i; break; } }
+            SendMessageW(shapeCombo, CB_SETCURSEL, sel, 0);
+        } else {
+            // Just update selection
+            const char* keys[] = { "arrow","hand","ibeam","cross","sizeall","wait","circle","square" };
+            int sel = 0;
+            for (int i = 0; i < 8; ++i) { if (m_working.highlightShape == keys[i]) { sel = i; break; } }
+            SendMessageW(shapeCombo, CB_SETCURSEL, sel, 0);
+        }
+    }
+
+    bool hasFile = !m_working.highlightCustomFile.empty();
+    CheckRadioButton(hwnd, IDC_RADIO_CONFIG, IDC_RADIO_FILE,
+        hasFile ? IDC_RADIO_FILE : IDC_RADIO_CONFIG);
+
+    updateHighlightControls(hwnd);
+    updatePreviewCursor();
+
+    // Refresh current cursor canvas
+    HWND hCurCanvas = GetDlgItem(hwnd, IDC_CANVAS_CURRENT);
+    if (hCurCanvas) {
+        if (m_hCurCurrent) DestroyCursor(m_hCurCurrent);
+        m_hCurCurrent = CopyCursor(LoadCursor(nullptr, IDC_ARROW));
+        SetPropW(hCurCanvas, L"CURSOR", (HANDLE)m_hCurCurrent);
+        InvalidateRect(hCurCanvas, nullptr, TRUE);
+        UpdateWindow(hCurCanvas);
+    }
+
+    SetDlgItemTextW(hwnd, IDC_STATUS, L"已刷新");
+    SetTimer(hwnd, 999, 2000, nullptr);
+}
+
 void ConfigDialog::onChooseColor(HWND hwnd) {
     static COLORREF s_custom[16] = {};
     CHOOSECOLORW cc = { sizeof(cc) };
@@ -221,18 +275,25 @@ void ConfigDialog::onInit(HWND hwnd) {
     SendDlgItemMessageW(hwnd, IDC_SPIN_HIGHLIGHT_SIZE, UDM_SETRANGE32, 24, 128);
 
     // Shape combo (system cursor states + custom colored)
+    // Use CB_RESETCONTENT first, then CB_INITSTORAGE, then populate
     HWND shapeCombo = GetDlgItem(hwnd, IDC_COMBO_SHAPE);
     if (shapeCombo) {
+        SendMessageW(shapeCombo, CB_RESETCONTENT, 0, 0);
+        SendMessageW(shapeCombo, CB_INITSTORAGE, 8, 32);
         const wchar_t* names[] = {
-            L"标准选择 (箭头)", L"链接选择 (手型)", L"文本选择 (I型)",
-            L"精确选择 (十字)", L"移动 (四向)",      L"忙碌 (等待)",
-            L"圆形彩色",        L"方形彩色"
+            L"标准选择(箭头)", L"链接选择(手型)", L"文本选择(I型)",
+            L"精确选择(十字)",   L"移动(四向)",     L"忙碌(等待)",
+            L"圆形彩色",         L"方形彩色"
         };
-        const char* keys[] = {
-            "arrow","hand","ibeam","cross","sizeall","wait","circle","square"
-        };
-        for (int i = 0; i < 8; ++i)
-            SendMessageW(shapeCombo, CB_ADDSTRING, 0, (LPARAM)names[i]);
+        const char* keys[] = { "arrow","hand","ibeam","cross","sizeall","wait","circle","square" };
+        for (int i = 0; i < 8; ++i) {
+            LRESULT idx = SendMessageW(shapeCombo, CB_ADDSTRING, 0, (LPARAM)names[i]);
+            if (idx == CB_ERR || idx == CB_ERRSPACE) {
+                // Fallback: add short ASCII name
+                std::wstring wkey(keys[i], keys[i] + strlen(keys[i]));
+                SendMessageW(shapeCombo, CB_ADDSTRING, 0, (LPARAM)wkey.c_str());
+            }
+        }
         int sel = 0;
         for (int i = 0; i < 8; ++i) { if (cfg.highlightShape == keys[i]) { sel = i; break; } }
         SendMessageW(shapeCombo, CB_SETCURSEL, sel, 0);
@@ -354,6 +415,7 @@ void ConfigDialog::onCommand(HWND hwnd, WORD id, WORD code, HWND /*ctl*/) {
     case IDC_COMBO_SHAPE: if (code == CBN_SELCHANGE) updatePreviewCursor(); break;
     case IDC_EDIT_HIGHLIGHT_SIZE: if (code == EN_CHANGE) updatePreviewCursor(); break;
     case IDC_BTN_COLOR: onChooseColor(hwnd); break;
+    case IDC_BTN_REFRESH: onRefreshHighlight(hwnd); break;
     case IDC_BTN_BROWSE_CUR: onBrowseCustomCursor(hwnd); break;
     }
 }

@@ -37,6 +37,7 @@
 // Toggle
 #define IDC_RADIO_CONFIG         1053
 #define IDC_RADIO_FILE           1054
+#define IDC_BTN_REFRESH           1055
 
 // Radio buttons — target area
 #define IDC_RADIO_WINDOW        1040

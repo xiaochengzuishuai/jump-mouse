@@ -68,6 +68,7 @@ FONT 9, "Segoe UI"
     CONTROL         "导入文件", IDC_RADIO_FILE, "Button",
                     BS_AUTORADIOBUTTON | WS_TABSTOP, 275, 214, 70, 14
     PUSHBUTTON      "浏览...", IDC_BTN_BROWSE_CUR, 195, 232, 60, 14
+    PUSHBUTTON      "刷新", IDC_BTN_REFRESH, 340, 232, 45, 14
 
     LTEXT           "检测到鼠标移动后自动恢复原始光标", IDC_STATIC, 22, 255, 300, 12
 

@@ -37,6 +37,7 @@ private:
     void showTrayMenu();
     void updatePreviewCursor();
     void updateHighlightControls(HWND hwnd);
+    void onRefreshHighlight(HWND hwnd);
 
     static INT_PTR CALLBACK dlgProc(HWND, UINT, WPARAM, LPARAM);
     void onInit(HWND hwnd);
