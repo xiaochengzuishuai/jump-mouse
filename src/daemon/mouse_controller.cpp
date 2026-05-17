@@ -147,9 +147,14 @@ bool MouseController::applyHighlight() {
 
     HCURSOR hNew = nullptr;
     if (!m_highlightCustomFile.empty()) {
-        std::wstring wfile(m_highlightCustomFile.begin(), m_highlightCustomFile.end());
-        hNew = (HCURSOR)LoadImageW(nullptr, wfile.c_str(), IMAGE_CURSOR,
-            m_highlightSize, m_highlightSize, LR_LOADFROMFILE);
+        // Convert UTF-8 back to wide string (reverse of UI-side WideCharToMultiByte)
+        int wlen = MultiByteToWideChar(CP_UTF8, 0, m_highlightCustomFile.c_str(), -1, nullptr, 0);
+        if (wlen > 1) {
+            std::wstring wfile(wlen - 1, L'\0');
+            MultiByteToWideChar(CP_UTF8, 0, m_highlightCustomFile.c_str(), -1, &wfile[0], wlen);
+            hNew = (HCURSOR)LoadImageW(nullptr, wfile.c_str(), IMAGE_CURSOR,
+                m_highlightSize, m_highlightSize, LR_LOADFROMFILE);
+        }
     }
     if (!hNew) {
         hNew = createColorCursor(m_highlightSize, m_highlightShape,

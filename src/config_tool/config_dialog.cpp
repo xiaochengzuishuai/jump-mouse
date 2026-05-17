@@ -106,36 +106,45 @@ void ConfigDialog::refreshStatus() { refreshDaemonStatus(m_hwnd); }
 // ===================== Preview =====================
 
 void ConfigDialog::updatePreviewCursor() {
-    if (m_hCurPreview) { DestroyCursor(m_hCurPreview); m_hCurPreview = nullptr; }
-
     bool enabled = IsDlgButtonChecked(m_hwnd, IDC_CHECK_HIGHLIGHT) == BST_CHECKED;
     bool useFile = IsDlgButtonChecked(m_hwnd, IDC_RADIO_FILE) == BST_CHECKED;
 
     BOOL tr; int size = (int)GetDlgItemInt(m_hwnd, IDC_EDIT_HIGHLIGHT_SIZE, &tr, FALSE);
     if (!tr || size < 24) size = 48;
 
+    HCURSOR hNew = nullptr;
     if (!enabled) {
-        m_hCurPreview = CopyCursor(LoadCursor(nullptr, IDC_ARROW));
+        hNew = CopyCursor(LoadCursor(nullptr, IDC_ARROW));
     } else if (useFile) {
         if (!m_working.highlightCustomFile.empty()) {
-            std::wstring wf(m_working.highlightCustomFile.begin(), m_working.highlightCustomFile.end());
-            m_hCurPreview = (HCURSOR)LoadImageW(nullptr, wf.c_str(), IMAGE_CURSOR, size, size, LR_LOADFROMFILE);
+            int wlen = MultiByteToWideChar(CP_UTF8, 0, m_working.highlightCustomFile.c_str(), -1, nullptr, 0);
+            if (wlen > 1) {
+                std::wstring wf(wlen - 1, L'\0');
+                MultiByteToWideChar(CP_UTF8, 0, m_working.highlightCustomFile.c_str(), -1, &wf[0], wlen);
+                hNew = (HCURSOR)LoadImageW(nullptr, wf.c_str(), IMAGE_CURSOR, size, size, LR_LOADFROMFILE);
+            }
         }
-        if (!m_hCurPreview) m_hCurPreview = CopyCursor(LoadCursor(nullptr, IDC_ARROW));
+        if (!hNew) hNew = CopyCursor(LoadCursor(nullptr, IDC_ARROW));
     } else {
         HWND hCombo = GetDlgItem(m_hwnd, IDC_COMBO_SHAPE);
         int si = (int)SendMessageW(hCombo, CB_GETCURSEL, 0, 0);
         const char* keys[] = { "arrow","hand","ibeam","cross","sizeall","wait","circle","square" };
         std::string shape = (si >= 0 && si < 8) ? keys[si] : "arrow";
-        m_hCurPreview = MouseController::createColorCursor(size, shape, m_working.highlightColor);
+        hNew = MouseController::createColorCursor(size, shape, m_working.highlightColor);
     }
-    if (!m_hCurPreview) m_hCurPreview = CopyCursor(LoadCursor(nullptr, IDC_ARROW));
+    if (!hNew) hNew = CopyCursor(LoadCursor(nullptr, IDC_ARROW));
 
+    // Set property BEFORE destroying old cursor (avoids race window)
     HWND hCanvas = GetDlgItem(m_hwnd, IDC_CANVAS_PREVIEW);
     if (hCanvas) {
-        SetPropW(hCanvas, L"CURSOR", (HANDLE)m_hCurPreview);
+        SetPropW(hCanvas, L"CURSOR", (HANDLE)hNew);
         InvalidateRect(hCanvas, nullptr, TRUE);
+        UpdateWindow(hCanvas);
     }
+
+    // Now safe to destroy old preview cursor
+    if (m_hCurPreview) DestroyCursor(m_hCurPreview);
+    m_hCurPreview = hNew;
 }
 
 void ConfigDialog::updateHighlightControls(HWND hwnd) {
@@ -149,8 +158,10 @@ void ConfigDialog::updateHighlightControls(HWND hwnd) {
 
     EnableWindow(GetDlgItem(hwnd, IDC_COMBO_SHAPE), enabled && !useFile);
     EnableWindow(GetDlgItem(hwnd, IDC_BTN_COLOR), enabled && !useFile && isCustomColored);
-    EnableWindow(GetDlgItem(hwnd, IDC_EDIT_HIGHLIGHT_SIZE), enabled);
-    EnableWindow(GetDlgItem(hwnd, IDC_SPIN_HIGHLIGHT_SIZE), enabled);
+    // Size: enabled for custom colored shapes (circle/square) or file mode
+    bool sizeOn = enabled && (useFile || isCustomColored);
+    EnableWindow(GetDlgItem(hwnd, IDC_EDIT_HIGHLIGHT_SIZE), sizeOn);
+    EnableWindow(GetDlgItem(hwnd, IDC_SPIN_HIGHLIGHT_SIZE), sizeOn);
     EnableWindow(GetDlgItem(hwnd, IDC_RADIO_CONFIG), enabled);
     EnableWindow(GetDlgItem(hwnd, IDC_RADIO_FILE), enabled);
     EnableWindow(GetDlgItem(hwnd, IDC_BTN_BROWSE_CUR), enabled && useFile);
@@ -292,7 +303,9 @@ void ConfigDialog::collectValues(HWND hwnd) {
     const char* keys[] = { "arrow","hand","ibeam","cross","sizeall","wait","circle","square" };
     m_working.highlightShape = (si >= 0 && si < 8) ? keys[si] : "arrow";
 
-    // Color is already in m_working.highlightColor (set via color picker or init)
+    // Clear custom file if config mode is active
+    if (IsDlgButtonChecked(hwnd, IDC_RADIO_CONFIG) == BST_CHECKED)
+        m_working.highlightCustomFile.clear();
 
     m_working.excludedProcesses.clear();
     HWND list = GetDlgItem(hwnd, IDC_LIST_EXCLUDE);
