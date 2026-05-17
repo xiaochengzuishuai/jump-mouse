@@ -49,9 +49,9 @@ FONT 9, "Segoe UI"
                     BS_AUTOCHECKBOX | WS_TABSTOP, 22, 142, 45, 14
 
     LTEXT           "当前光标", IDC_STATIC, 22, 162, 68, 12
-    CONTROL         "", IDC_CANVAS_CURRENT, "CursorCanvas", WS_BORDER, 22, 176, 68, 68
+    CONTROL         "", IDC_CANVAS_CURRENT, "Static", SS_BITMAP | WS_BORDER, 22, 176, 68, 68
     LTEXT           "预览", IDC_STATIC, 108, 162, 68, 12
-    CONTROL         "", IDC_CANVAS_PREVIEW, "CursorCanvas", WS_BORDER, 108, 176, 68, 68
+    CONTROL         "", IDC_CANVAS_PREVIEW, "Static", SS_BITMAP | WS_BORDER, 108, 176, 68, 68
 
     LTEXT           "形状:", IDC_STATIC, 195, 170, 30, 12
     COMBOBOX        IDC_COMBO_SHAPE, 225, 168, 85, 150, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP

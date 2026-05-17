@@ -7,6 +7,35 @@
 
 static INT_PTR CALLBACK inputDlgProc(HWND, UINT, WPARAM, LPARAM);
 
+// Canvas subclass: paints HCURSOR stored via SetPropW(L"CURSOR")
+static LRESULT CALLBACK CanvasSubclassProc(HWND hwnd, UINT msg, WPARAM w, LPARAM l) {
+    if (msg == WM_PAINT) {
+        PAINTSTRUCT ps; HDC hdc = BeginPaint(hwnd, &ps);
+        RECT rc; GetClientRect(hwnd, &rc);
+        FillRect(hdc, &rc, (HBRUSH)(COLOR_WINDOW + 1));
+        HCURSOR hCur = (HCURSOR)GetPropW(hwnd, L"CURSOR");
+        if (hCur) {
+            ICONINFO ii = {};
+            if (GetIconInfo(hCur, &ii)) {
+                BITMAP bm = {}; int cw = 32, ch = 32;
+                if (ii.hbmColor && GetObjectW(ii.hbmColor, sizeof(bm), &bm)) { cw = bm.bmWidth; ch = bm.bmHeight; }
+                else if (ii.hbmMask && GetObjectW(ii.hbmMask, sizeof(bm), &bm)) { cw = bm.bmWidth; ch = bm.bmHeight / 2; }
+                int pad = 6, aw = rc.right - rc.left - pad*2, ah = rc.bottom - rc.top - pad*2;
+                float s = 3.0f; if (cw > 0) s = min(s, (float)aw/cw); if (ch > 0) s = min(s, (float)ah/ch);
+                int dw = (int)(cw*s), dh = (int)(ch*s);
+                int x = (rc.right - rc.left - dw)/2, y = (rc.bottom - rc.top - dh)/2;
+                DrawIconEx(hdc, x, y, hCur, dw, dh, 0, nullptr, DI_NORMAL);
+                if (ii.hbmMask)  DeleteObject(ii.hbmMask);
+                if (ii.hbmColor) DeleteObject(ii.hbmColor);
+            }
+        }
+        FrameRect(hdc, &rc, (HBRUSH)GetStockObject(GRAY_BRUSH));
+        EndPaint(hwnd, &ps); return 0;
+    }
+    if (msg == WM_ERASEBKGND) return 1;
+    return DefWindowProcW(hwnd, msg, w, l);
+}
+
 // ===================== Constructor =====================
 
 ConfigDialog::ConfigDialog(HINSTANCE hInstance, const std::wstring& configPath)
@@ -291,7 +320,11 @@ void ConfigDialog::onInit(HWND hwnd) {
     SetDlgItemInt(hwnd, IDC_EDIT_HIGHLIGHT_SIZE, cfg.highlightSize, FALSE);
     SendDlgItemMessageW(hwnd, IDC_SPIN_HIGHLIGHT_SIZE, UDM_SETRANGE32, 24, 128);
 
-    // Shape combo (system cursor states + custom colored)
+    // Subclass canvas static controls for cursor painting
+    SetWindowLongPtrW(GetDlgItem(hwnd, IDC_CANVAS_CURRENT), GWLP_WNDPROC, (LONG_PTR)CanvasSubclassProc);
+    SetWindowLongPtrW(GetDlgItem(hwnd, IDC_CANVAS_PREVIEW), GWLP_WNDPROC, (LONG_PTR)CanvasSubclassProc);
+
+    // Shape combo
     // Use CB_RESETCONTENT first, then CB_INITSTORAGE, then populate
     HWND shapeCombo = GetDlgItem(hwnd, IDC_COMBO_SHAPE);
     if (shapeCombo) {
