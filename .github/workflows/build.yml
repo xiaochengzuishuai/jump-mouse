@@ -27,15 +27,13 @@ jobs:
 
       - name: Create zip
         shell: pwsh
-        run: |
-          $tag = "${{ github.ref_name }}"
-          Compress-Archive -Path build/release/* -DestinationPath "JumpMouse-$tag-Win10-Win11-x64.zip"
+        run: Compress-Archive -Path build/release/* -DestinationPath "JumpMouse-${{ github.ref_name }}-Win10-Win11-x64.zip"
 
-      - name: Upload zip
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: JumpMouse-${{ github.ref_name }}-x64
-          path: JumpMouse-${{ github.ref_name }}-x64.zip
+          name: JumpMouse-${{ github.ref_name }}-Win10-Win11-x64
+          path: JumpMouse-${{ github.ref_name }}-Win10-Win11-x64.zip
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
@@ -44,7 +42,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: JumpMouse-${{ github.ref_name }}-x64
+          name: JumpMouse-${{ github.ref_name }}-Win10-Win11-x64
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -69,6 +67,6 @@ jobs:
             ### 系统要求
             - Windows 10/11 64-bit
             - 无需安装任何运行时（静态链接）
-          files: JumpMouse-${{ github.ref_name }}-x64.zip
+          files: JumpMouse-${{ github.ref_name }}-Win10-Win11-x64.zip
           draft: false
           prerelease: false
