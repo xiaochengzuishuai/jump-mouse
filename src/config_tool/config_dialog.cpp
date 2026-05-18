@@ -35,7 +35,7 @@ void ConfigDialog::createTrayIcon() {
     m_nid = { sizeof(NOTIFYICONDATAW) }; m_nid.hWnd = m_hwnd; m_nid.uID = UID_TRAY;
     m_nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
     m_nid.uCallbackMessage = WM_TRAYICON; m_nid.hIcon = hIcon;
-    wcscpy_s(m_nid.szTip, L"Mouse Focus");
+    wcscpy_s(m_nid.szTip, L"Jump Mouse");
     Shell_NotifyIconW(NIM_ADD, &m_nid);
     if (hIcon) DestroyIcon(hIcon);
 }

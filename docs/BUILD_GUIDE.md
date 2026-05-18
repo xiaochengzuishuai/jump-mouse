@@ -1,4 +1,4 @@
-# Mouse Focus — 完整编译与环境配置指南
+# Jump Mouse — 完整编译与环境配置指南
 
 > 适用平台：Windows 10 / Windows 11  
 > 编译器：MSVC (Visual Studio 2022)  
@@ -110,15 +110,15 @@ CMake generation finished.
 
 ```
 项目根目录/out/build/x64-Release/
-├── mouse_focus_daemon.exe
-├── mouse_focus_config.exe
+├── jump_mouse_daemon.exe
+├── jump_mouse_config.exe
 └── config.json
 ```
 
 ### 步骤 5：运行
 
 在 VS 中直接运行：
-- 顶部工具栏启动项下拉 → 选择 `mouse_focus_config.exe`
+- 顶部工具栏启动项下拉 → 选择 `jump_mouse_config.exe`
 - 点击绿色 ▶ 按钮
 
 ---
@@ -180,8 +180,8 @@ cmake --build build --config Release --parallel
 
 ```
 build/Release/
-├── mouse_focus_daemon.exe
-├── mouse_focus_config.exe
+├── jump_mouse_daemon.exe
+├── jump_mouse_config.exe
 └── config.json
 ```
 
@@ -195,8 +195,8 @@ cmake -B build -S . -G "Visual Studio 17 2022" -A x64
 cmake --build build --config Release --parallel
 echo.
 echo Build complete. Output: build\Release\
-echo   mouse_focus_daemon.exe
-echo   mouse_focus_config.exe
+echo   jump_mouse_daemon.exe
+echo   jump_mouse_config.exe
 pause
 ```
 
@@ -265,7 +265,7 @@ Visual Studio Community 2022 Release - amd64
 
 ### 步骤 7：运行/调试
 
-- 按 `Ctrl+Shift+P` → `CMake: Set Launch Target` → 选择 `mouse_focus_config.exe`
+- 按 `Ctrl+Shift+P` → `CMake: Set Launch Target` → 选择 `jump_mouse_config.exe`
 - 按 `Shift+F5` 运行（不含调试）
 - 按 `Ctrl+F5` 调试运行
 
@@ -293,7 +293,7 @@ Visual Studio Community 2022 Release - amd64
       "name": "Config Tool (Debug)",
       "type": "cppvsdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/Release/mouse_focus_config.exe",
+      "program": "${workspaceFolder}/build/Release/jump_mouse_config.exe",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
@@ -304,7 +304,7 @@ Visual Studio Community 2022 Release - amd64
       "name": "Daemon (Debug)",
       "type": "cppvsdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/Release/mouse_focus_daemon.exe",
+      "program": "${workspaceFolder}/build/Release/jump_mouse_daemon.exe",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
@@ -346,7 +346,7 @@ cmake -B build_vs -S . -G "Visual Studio 17 2022" -A x64
       "type": "shell",
       "command": "MSBuild",
       "args": [
-        "${workspaceFolder}\\build_vs\\mouse_focus.sln",
+        "${workspaceFolder}\\build_vs\\jump_mouse.sln",
         "/p:Configuration=Release",
         "/p:Platform=x64",
         "/m",
@@ -364,7 +364,7 @@ cmake -B build_vs -S . -G "Visual Studio 17 2022" -A x64
       "type": "shell",
       "command": "MSBuild",
       "args": [
-        "${workspaceFolder}\\build_vs\\mouse_focus.sln",
+        "${workspaceFolder}\\build_vs\\jump_mouse.sln",
         "/p:Configuration=Debug",
         "/p:Platform=x64",
         "/m"
@@ -476,8 +476,8 @@ cd "E:\玩转ai\cc_project\鼠标聚焦脚本"
 
 ```
 build/Release/
-├── mouse_focus_daemon.exe     # 后台守护进程（无窗口）
-├── mouse_focus_config.exe     # GUI 配置工具
+├── jump_mouse_daemon.exe     # 后台守护进程（无窗口）
+├── jump_mouse_config.exe     # GUI 配置工具
 └── config.json               # 默认配置文件（从项目根复制）
 ```
 
@@ -485,12 +485,12 @@ build/Release/
 
 ```cmd
 # 1. 打开 GUI 配置界面
-mouse_focus_config.exe
+jump_mouse_config.exe
 
 # 2. 在界面上点"启动"启动守护进程
 
 # 或者直接启动守护进程（使用默认配置）
-mouse_focus_daemon.exe
+jump_mouse_daemon.exe
 ```
 
 ### 发布打包
@@ -499,8 +499,8 @@ mouse_focus_daemon.exe
 
 ```
 AnyFolder/
-├── mouse_focus_daemon.exe
-├── mouse_focus_config.exe
+├── jump_mouse_daemon.exe
+├── jump_mouse_config.exe
 └── config.json
 ```
 
@@ -562,17 +562,17 @@ cmake -B build -S . -DCMAKE_SYSTEM_VERSION=10.0.22621.0
 **解决**：
 ```cmd
 # 方法1：通过 GUI 工具点"停止"
-mouse_focus_config.exe
+jump_mouse_config.exe
 
 # 方法2：任务管理器手动结束
-taskkill /f /im mouse_focus_daemon.exe
+taskkill /f /im jump_mouse_daemon.exe
 ```
 
 ### Q6：鼠标移动行为不符合预期
 
 **排查步骤**：
 1. 将 `config.json` 中的 `logLevel` 改为 `"debug"`
-2. 指定 `logFile` 路径（如 `"C:\\mouse_focus.log"`）
+2. 指定 `logFile` 路径（如 `"C:\\jump_mouse.log"`）
 3. 重启守护进程
 4. Alt+Tab 切换几次后查看日志文件
 
@@ -594,7 +594,7 @@ reg query HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v MouseFocusDaemon
 **原因**：DPI Awareness 未被正确声明。
 
 **解决**：
-1. 确保 `mouse_focus.manifest` 文件与 exe 在同一目录
+1. 确保 `jump_mouse.manifest` 文件与 exe 在同一目录
 2. 或使用 PropertySheet 嵌入清单（已通过 .rc 文件处理，确保编译时 .rc 被包含）
 3. 验证：右键 .exe → 属性 → 兼容性 → 更改高 DPI 设置 → 查看是否显示"由应用程序控制"
 

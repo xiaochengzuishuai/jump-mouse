@@ -1,10 +1,10 @@
-// Mouse Focus Daemon — background process
+// Jump Mouse Daemon — background process
 // Listens for Alt+Tab window switches and moves cursor to window center.
 //
 // Usage:
-//   mouse_focus_daemon.exe                    — run with config.json in exe directory
-//   mouse_focus_daemon.exe --config <path>    — run with custom config path
-//   mouse_focus_daemon.exe --help             — show usage
+//   jump_mouse_daemon.exe                    — run with config.json in exe directory
+//   jump_mouse_daemon.exe --config <path>    — run with custom config path
+//   jump_mouse_daemon.exe --help             — show usage
 
 #include "application.h"
 #include "../common/logger.h"
@@ -20,15 +20,15 @@ static std::wstring getExeDir() {
 
 static void printUsage() {
     MessageBoxW(nullptr,
-        L"Mouse Focus Daemon\n\n"
+        L"Jump Mouse Daemon\n\n"
         L"Usage:\n"
-        L"  mouse_focus_daemon.exe [options]\n\n"
+        L"  jump_mouse_daemon.exe [options]\n\n"
         L"Options:\n"
         L"  --config <path>   Specify config file path\n"
         L"  --help            Show this message\n\n"
         L"The daemon runs as a background process with no window.\n"
-        L"Use mouse_focus_config.exe to change settings.",
-        L"Mouse Focus Daemon", MB_OK | MB_ICONINFORMATION);
+        L"Use jump_mouse_config.exe to change settings.",
+        L"Jump Mouse Daemon", MB_OK | MB_ICONINFORMATION);
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {

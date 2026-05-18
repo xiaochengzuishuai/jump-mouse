@@ -43,8 +43,8 @@ private:
     void executeMove(HWND target);
 
     static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-    static constexpr const wchar_t* WINDOW_CLASS = L"MouseFocusDaemon_Hidden";
-    static constexpr const wchar_t* MUTEX_NAME   = L"Global\\MouseFocusScript_Instance";
+    static constexpr const wchar_t* WINDOW_CLASS = L"JumpMouse_Hidden";
+    static constexpr const wchar_t* MUTEX_NAME   = L"Global\\JumpMouse_Instance";
 };
 
 extern Application* g_application;

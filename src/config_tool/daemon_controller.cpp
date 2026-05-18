@@ -75,7 +75,7 @@ bool DaemonController::stop() {
 }
 
 HWND DaemonController::findDaemonWindow() const {
-    return FindWindowW(L"MouseFocusDaemon_Hidden", L"");
+    return FindWindowW(L"JumpMouse_Hidden", L"");
 }
 
 bool DaemonController::setAutoStart(bool enable) {
@@ -89,12 +89,12 @@ bool DaemonController::setAutoStart(bool enable) {
     bool ok = false;
     if (enable) {
         auto path = daemonPath();
-        ok = (RegSetValueExW(hKey, L"MouseFocusDaemon", 0, REG_SZ,
+        ok = (RegSetValueExW(hKey, L"JumpMouse", 0, REG_SZ,
                 reinterpret_cast<const BYTE*>(path.c_str()),
                 static_cast<DWORD>((path.size() + 1) * sizeof(wchar_t))) == ERROR_SUCCESS);
     } else {
-        ok = (RegDeleteValueW(hKey, L"MouseFocusDaemon") == ERROR_SUCCESS
-              || RegDeleteValueW(hKey, L"MouseFocusDaemon") == ERROR_FILE_NOT_FOUND);
+        ok = (RegDeleteValueW(hKey, L"JumpMouse") == ERROR_SUCCESS
+              || RegDeleteValueW(hKey, L"JumpMouse") == ERROR_FILE_NOT_FOUND);
     }
     RegCloseKey(hKey);
     return ok;
@@ -110,7 +110,7 @@ bool DaemonController::isAutoStart() const {
     DWORD type;
     wchar_t buf[512] = {};
     DWORD size = sizeof(buf);
-    bool exists = (RegQueryValueExW(hKey, L"MouseFocusDaemon", nullptr,
+    bool exists = (RegQueryValueExW(hKey, L"JumpMouse", nullptr,
                        &type, reinterpret_cast<LPBYTE>(buf), &size) == ERROR_SUCCESS);
     RegCloseKey(hKey);
     return exists;

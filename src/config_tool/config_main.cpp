@@ -1,4 +1,4 @@
-// Mouse Focus Config Tool — Win32 GUI with System Tray
+// Jump Mouse Config Tool — Win32 GUI with System Tray
 #include "config_dialog.h"
 #include <Windows.h>
 #include <CommCtrl.h>

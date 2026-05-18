@@ -29,7 +29,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: mouse-focus-v${{ github.ref_name }}-${{ matrix.arch }}
+          name: jump-mouse-v${{ github.ref_name }}-${{ matrix.arch }}
           path: build/release/*
 
   # Only create GitHub Release on tag push
@@ -40,32 +40,32 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: mouse-focus-v${{ github.ref_name }}-x64
+          name: jump-mouse-v${{ github.ref_name }}-x64
           path: release/
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          name: "仅跳转 ${{ github.ref_name }}"
+          name: "Jump Mouse — ${{ github.ref_name }}"
           body: |
-            ## Mouse Focus — 仅跳转 ${{ github.ref_name }}
+            ## Jump Mouse — ${{ github.ref_name }}
 
-            稳定版，纯 Alt+Tab 检测 + 鼠标自动跳转到窗口中心。
+            稳定版。Alt+Tab 窗口切换时，鼠标自动跳转到新窗口中心。
 
             ### 包含文件
-            - `mouse_focus_daemon.exe` — 后台守护进程
-            - `mouse_focus_config.exe` — GUI 配置工具
+            - `jump_mouse_daemon.exe` — 后台守护进程
+            - `jump_mouse_config.exe` — GUI 配置工具
             - `config.json` — 默认配置
 
-            ### 运行方式
-            1. 将全部文件放到同一目录
-            2. 运行 `mouse_focus_config.exe` 打开配置界面
-            3. 点击「启动」开启守护进程
-            4. 使用 Alt+Tab 切换窗口，鼠标自动跟随
+            ### 使用方法
+            1. 将所有文件放到同一目录
+            2. 运行 `jump_mouse_config.exe` 打开设置
+            3. 点击「启动」开启服务
+            4. Alt+Tab 切换窗口，鼠标自动跟随
 
             ### 系统要求
             - Windows 10/11 64-bit
-            - 无需安装任何运行时（已静态链接）
+            - 无需安装任何运行时（静态链接）
           files: release/*
           draft: false
           prerelease: false

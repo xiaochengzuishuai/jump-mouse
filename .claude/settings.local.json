@@ -15,7 +15,8 @@
       "Bash(where cmake *)",
       "Read(//c/Program Files/Microsoft Visual Studio/**)",
       "Read(//c/Program Files \\(x86\\)/Microsoft Visual Studio/**)",
-      "Read(//e/VS-ALL/Product/VC/**)"
+      "Read(//e/VS-ALL/Product/VC/**)",
+      "Bash(git mv *)"
     ]
   }
 }

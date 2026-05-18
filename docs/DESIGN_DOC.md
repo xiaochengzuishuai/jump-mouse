@@ -1,4 +1,4 @@
-# 窗口聚焦鼠标自动移动 — 设计文档
+# Jump Mouse — 仅跳转V1.0 设计文档
 
 > 版本：仅跳转V1.0（稳定版） | 日期：2026-05-18 | 状态：✅ 稳定版第一版
 
@@ -9,8 +9,8 @@
 **目标**：在 Windows 10/11 多显示器环境下，用户通过 Alt+Tab 切换前台窗口时，自动将鼠标光标移动到新聚焦窗口的中心位置。
 
 **架构方案**：双可执行文件
-- `mouse_focus_daemon.exe` — 无窗口后台守护进程，负责实际的窗口监听与鼠标控制
-- `mouse_focus_config.exe` — Win32 原生 GUI 配置工具，所见即所得编辑配置，保存为 `config.json`
+- `jump_mouse_daemon.exe` — 无窗口后台守护进程，负责实际的窗口监听与鼠标控制
+- `jump_mouse_config.exe` — Win32 原生 GUI 配置工具，所见即所得编辑配置，保存为 `config.json`
 
 **核心约束**：
 - 守护进程无窗口后台运行，配置工具为独立 GUI
@@ -32,7 +32,7 @@
          │ 读取                  │ 读写
          ▼                       ▼
 ┌────────────────────┐  ┌──────────────────────────┐
-│ mouse_focus_daemon │  │ mouse_focus_config.exe    │
+│ jump_mouse_daemon │  │ jump_mouse_config.exe    │
 │ （后台守护进程）     │  │ （Win32 GUI 配置工具）     │
 │                    │  │                          │
 │ 读取config.json    │  │ 可视化编辑所有配置项       │
@@ -183,7 +183,7 @@
 
 - 格式：JSON
 - 默认路径：可执行文件同目录 `config.json`
-- 支持命令行指定：`mouse_focus_daemon.exe --config "D:\path\config.json"`
+- 支持命令行指定：`jump_mouse_daemon.exe --config "D:\path\config.json"`
 - 支持运行时热重载（轮询文件修改时间）
 
 ### 4.2 Schema
@@ -295,7 +295,7 @@ mouse_focus/
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Mouse Focus — 设置                              [—] [□] [×]│
+│  Jump Mouse — 设置                              [—] [□] [×]│
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  ┌─ 核心行为 ────────────────────────────────────────────┐ │
@@ -470,29 +470,29 @@ cmake --build build --config Release
 ```
 
 生成文件：
-- `build\Release\mouse_focus_daemon.exe`
-- `build\Release\mouse_focus_config.exe`
+- `build\Release\jump_mouse_daemon.exe`
+- `build\Release\jump_mouse_config.exe`
 
 ### 使用方式
 
 ```
 # 守护进程（后台运行，无窗口）
-mouse_focus_daemon.exe
-mouse_focus_daemon.exe --config "D:\my_config.json"
+jump_mouse_daemon.exe
+jump_mouse_daemon.exe --config "D:\my_config.json"
 
 # GUI 配置工具
-mouse_focus_config.exe
+jump_mouse_config.exe
 ```
 
 **两程序协作流程**：
 
 ```
-用户打开 mouse_focus_config.exe
+用户打开 jump_mouse_config.exe
   → 修改设置 → 点 [保存] → 写入 config.json
   → 守护进程检测到文件变更 → 自动热重载新配置
 
 用户点 [启动]
-  → CreateProcess("mouse_focus_daemon.exe")
+  → CreateProcess("jump_mouse_daemon.exe")
   → 守护进程启动，创建互斥体
   → 配置工具检测到互斥体，显示"运行中"
 ```
