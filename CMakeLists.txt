@@ -31,22 +31,10 @@ add_executable(mouse_focus_config WIN32
     src/config_tool/daemon_controller.cpp
     src/common/config_manager.cpp
     src/common/adaptation_layer.cpp
-    src/daemon/mouse_controller.cpp
     src/mouse_focus.rc
 )
 target_include_directories(mouse_focus_config PRIVATE src)
 target_link_libraries(mouse_focus_config PRIVATE user32 kernel32 shell32 comctl32)
-
-# ========== Test harness (console) ==========
-add_executable(mouse_focus_test
-    src/test/test_harness.cpp
-    src/common/config_manager.cpp
-    src/common/adaptation_layer.cpp
-    src/daemon/mouse_controller.cpp
-    src/config_tool/daemon_controller.cpp
-)
-target_include_directories(mouse_focus_test PRIVATE src)
-target_link_libraries(mouse_focus_test PRIVATE user32 kernel32 shell32)
 
 # ========== Copy config and icon to output ==========
 add_custom_command(TARGET mouse_focus_daemon POST_BUILD

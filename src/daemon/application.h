@@ -12,7 +12,6 @@
 #define TIMER_SMOOTH_MOVE      1
 #define TIMER_POLL_WATCH       2
 #define TIMER_DELAYED_MOVE     3
-#define TIMER_HIGHLIGHT_POLL   4
 
 class Application {
 public:

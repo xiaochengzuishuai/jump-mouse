@@ -7,7 +7,15 @@
       "Bash(git commit -m ' *)",
       "Bash(git config *)",
       "Bash(cmake --build build --config Release)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(rm -rf \"E:/玩转ai/cc_project/鼠标聚焦脚本/build\")",
+      "Bash(cmake -B build -S .)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin\")",
+      "Bash(export PATH=\"$PATH:/c/Program Files \\(x86\\)/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin\")",
+      "Bash(where cmake *)",
+      "Read(//c/Program Files/Microsoft Visual Studio/**)",
+      "Read(//c/Program Files \\(x86\\)/Microsoft Visual Studio/**)",
+      "Read(//e/VS-ALL/Product/VC/**)"
     ]
   }
 }

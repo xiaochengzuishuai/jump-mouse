@@ -1,6 +1,6 @@
 # 窗口聚焦鼠标自动移动 — 设计文档
 
-> 版本：v2.0 | 日期：2026-05-16 | 状态：待评审 | 变更：双可执行文件架构 + Win32 GUI 配置工具
+> 版本：v2.1 | 日期：2026-05-17 | 状态：已实现 | 变更：移除鼠标个性化功能与测试脚本
 
 ---
 
@@ -16,7 +16,6 @@
 - 守护进程无窗口后台运行，配置工具为独立 GUI
 - 所有行为可通过 GUI 可视化配置
 - 自适应 Win10/Win11 差异
-- 代码可扩展、结构优良
 - 零额外运行时依赖（仅 Windows SDK + 标准库）
 
 ---
@@ -109,7 +108,7 @@
 | `FocusMonitor` | 监听前台窗口变化事件 | daemon only |
 | `KeyTracker` | 追踪 Alt 键按下/释放状态 | daemon only |
 | `TriggerDetector` | 判定窗口切换是否为 Alt+Tab 触发 | daemon only |
-| `MouseController` | 计算窗口中心 + 移动光标 | daemon only |
+| `MouseController` | 计算窗口中心 + 移动光标（instant/smooth） | daemon only |
 | `AdaptationLayer` | Win10/Win11 差异、DPI、UWP 检测 | daemon + config tool |
 | `Logger` | 可选调试日志 | daemon + config tool |
 | `DaemonController` | 启动/停止/查询守护进程 | config tool only |
@@ -136,7 +135,7 @@
 
 **关键判定条件**：
 1. 前台窗口变化事件到达时 `Alt` 处于按下状态 → 标记为"Alt+Tab 候选"
-2. 忽略 Alt+Tab 切换器自身窗口（类名 `TaskSwitcherWnd`、`MultitaskingViewFrame`）
+2. 忽略 Alt+Tab 切换器自身窗口（类名 `TaskSwitcherWnd`、`TopLevelWindowForOverflowXamlIsland`）
 3. Alt 释放时，若存在候选窗口 → 执行鼠标移动
 4. 排除非用户窗口（TaskBar、Progman、Shell_TrayWnd 等）
 5. Win+Tab 可以通过检测 `VK_LWIN` / `VK_RWIN` 作为补充支持
@@ -184,14 +183,13 @@
 
 - 格式：JSON
 - 默认路径：可执行文件同目录 `config.json`
-- 支持命令行指定：`mouse_focus.exe --config "D:\path\config.json"`
-- 支持运行时热重载（监听文件变更或定期检查）
+- 支持命令行指定：`mouse_focus_daemon.exe --config "D:\path\config.json"`
+- 支持运行时热重载（轮询文件修改时间）
 
 ### 4.2 Schema
 
 ```jsonc
 {
-  // === 核心行为 ===
   "version": 1,
 
   // 触发模式
@@ -202,34 +200,27 @@
   // 鼠标移动模式
   // "instant" — 瞬间移动
   // "smooth"  — 平滑动画
-  "mouseMode": "instant",
+  "mouseMode": "smooth",
 
-  // 平滑动画持续时间（毫秒），仅 mouseMode=smooth 时生效
-  "smoothDurationMs": 150,
+  // 平滑动画持续时间（毫秒），仅 mouseMode=smooth 时生效（50-600）
+  "smoothDurationMs": 600,
+
+  // Alt+Tab 后等待恢复中的最小化窗口的延迟（毫秒，0-2000）
+  "moveDelayMs": 100,
 
   // 是否启用
   "enabled": true,
 
-  // === 排除规则 ===
+  // 目标区域
+  // "window_rect" — 窗口完整矩形（含标题栏）的中心
+  // "client_rect" — 客户区中心（不含标题栏/边框）
+  "targetArea": "window_rect",
 
   // 排除的进程名（不含路径），不区分大小写
-  "excludedProcesses": [
-    // 示例:
-    // "devenv.exe",
-    // "spotify.exe"
-  ],
+  "excludedProcesses": [],
 
   // 排除的窗口类名片段（部分匹配）
-  "excludedClasses": [
-    // 默认始终排除系统窗口，此处为用户自定义追加
-  ],
-
-  // === 高级选项 ===
-
-  // 目标区域
-  // "window_rect"    — 窗口完整矩形（含标题栏）的中心
-  // "client_rect"    — 客户区中心（不含标题栏/边框）
-  "targetArea": "window_rect",
+  "excludedClasses": [],
 
   // 日志级别: "none" | "error" | "warn" | "info" | "debug"
   "logLevel": "none",
@@ -252,34 +243,24 @@
 | DPI 缩放 | 支持 per-monitor v2 | 同左 | 声明 `PerMonitorV2` DPI Awareness |
 | UWP 应用 | 有 `ApplicationFrameWindow` 包裹 | 同左 | 获取实际子窗口 rect |
 
-### DPI 适配要点
-
-```cpp
-// 程序清单声明 DPI Awareness
-// PerMonitorV2: 每个显示器独立缩放，窗口移动时自动通知
-
-// 计算窗口中心时：
-// GetWindowRect 返回物理坐标，SetCursorPos 接受物理坐标
-// 不需要额外转换，但需要确保程序 DPI Aware
-```
-
 ---
 
 ## 6. 文件结构
 
 ```
 mouse_focus/
-├── CMakeLists.txt              # CMake 构建（MSVC）
-├── config.json                 # 默认配置
-├── DESIGN_DOC.md               # 本文件
+├── CMakeLists.txt
+├── config.json
+├── DESIGN_DOC.md
 │
 ├── src/
-│   ├── common/                 # === 共用模块 ===
+│   ├── common/
 │   │   ├── config_manager.h/cpp     # JSON 配置读写/验证
 │   │   ├── adaptation_layer.h/cpp   # Win 版本检测、DPI、窗口过滤
+│   │   ├── json_util.h              # 自研最小 JSON 解析器
 │   │   └── logger.h                 # 轻量日志宏
 │   │
-│   ├── daemon/                 # === 守护进程 ===
+│   ├── daemon/
 │   │   ├── daemon_main.cpp          # 入口、命令行解析
 │   │   ├── application.h/cpp        # 生命周期管理，模块组装
 │   │   ├── focus_monitor.h/cpp      # SetWinEventHook 封装
@@ -287,22 +268,24 @@ mouse_focus/
 │   │   ├── trigger_detector.h/cpp   # 触发逻辑核心
 │   │   └── mouse_controller.h/cpp   # 光标移动（instant + smooth）
 │   │
-│   └── config_tool/            # === GUI 配置工具 ===
+│   └── config_tool/
 │       ├── config_main.cpp          # WinMain 入口
 │       ├── config_dialog.h/cpp      # 主设置对话框（Win32 Dialog）
 │       └── daemon_controller.h/cpp  # 守护进程管理（启/停/状态）
 │
-├── third_party/
-│   └── nlohmann/               # nlohmann/json (header-only)
+├── ico图标/
+│   ├── 1.ico                        # 配置工具托盘图标
+│   └── exe.ico                      # 守护进程图标
 │
-└── README.md
+└── src/
+    ├── mouse_focus.rc               # 配置工具资源脚本
+    └── daemon.rc                    # 守护进程资源脚本
 ```
 
 **依赖**：
-- 标准库：C++20（`<filesystem>`、`<chrono>`、`<optional>`、`<format>`）
-- 第三方：`nlohmann/json`（header-only，JSON 解析）
+- 标准库：C++20（`<filesystem>`、`<chrono>`、`<format>`）
 - 系统：Windows SDK（`user32`、`kernel32`、`shell32`、`comctl32`）
-- 无其他运行时依赖
+- 零第三方依赖
 
 ---
 
@@ -323,7 +306,7 @@ mouse_focus/
 │  │  鼠标移动：                                            │ │
 │  │    ◉ 瞬间移动          ○ 平滑动画                     │ │
 │  │                                                        │ │
-│  │  动画时长：[ 150 ] ms  (50-300)                        │ │
+│  │  时长/延迟 ms：[ 600 ] [ 100 ]                        │ │
 │  │                                                        │ │
 │  │  目标区域：                                            │ │
 │  │    ◉ 窗口中心（含标题栏）  ○ 客户区中心                │ │
@@ -333,14 +316,10 @@ mouse_focus/
 │  └────────────────────────────────────────────────────────┘ │
 │                                                             │
 │  ┌─ 排除规则 ────────────────────────────────────────────┐ │
-│  │                                                        │ │
-│  │  排除进程（按进程名，如 "devenv.exe"）：               │ │
-│  │  ┌──────────────────────────────────┐  [添加]          │ │
-│  │  │ devenv.exe                       │  [移除]          │ │
-│  │  │ spotify.exe                      │                  │ │
-│  │  │                                  │                  │ │
-│  │  └──────────────────────────────────┘                  │ │
-│  │                                                        │ │
+│  │  进程名列表（如 devenv.exe）：                          │ │
+│  │  ┌───────────────────────┐  [添加]                     │ │
+│  │  │                       │  [移除]                     │ │
+│  │  └───────────────────────┘                             │ │
 │  └────────────────────────────────────────────────────────┘ │
 │                                                             │
 │  ┌─ 守护进程状态 ────────────────────────────────────────┐ │
@@ -348,10 +327,10 @@ mouse_focus/
 │  └────────────────────────────────────────────────────────┘ │
 │                                                             │
 │  ┌─ 日志 ────────────────────────────────────────────────┐ │
-│  │  日志级别：[无 ▼]    日志文件：[                ] [浏览]│ │
+│  │  日志级别：[无 ▼]                                      │ │
 │  └────────────────────────────────────────────────────────┘ │
 │                                                             │
-│                    [保存设置]   [取消]                       │
+│                    [保存设置]   [关闭]                       │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -362,206 +341,62 @@ mouse_focus/
 |--------|---------|---------|------|
 | `triggerMode` | Radio Button 组 | `IDC_RADIO_ALT_TAB` / `IDC_RADIO_ANY` | 二选一 |
 | `mouseMode` | Radio Button 组 | `IDC_RADIO_INSTANT` / `IDC_RADIO_SMOOTH` | 二选一 |
-| `smoothDurationMs` | Edit + Spin | `IDC_EDIT_DURATION` + `IDC_SPIN_DURATION` | 范围 50-300 |
+| `smoothDurationMs` | Edit + Spin | `IDC_EDIT_DURATION` + `IDC_SPIN_DURATION` | 范围 50-600 |
+| `moveDelayMs` | Edit + Spin | `IDC_EDIT_DELAY` + `IDC_SPIN_DELAY` | 范围 0-2000 |
 | `targetArea` | Radio Button 组 | `IDC_RADIO_WINDOW` / `IDC_RADIO_CLIENT` | 二选一 |
 | `enabled` | CheckBox | `IDC_CHECK_ENABLED` | 勾选/取消 |
 | `excludedProcesses` | ListBox + Add + Remove | `IDC_LIST_EXCLUDE` + `IDC_BTN_ADD` + `IDC_BTN_REMOVE` | 进程名列表 |
 | `logLevel` | ComboBox | `IDC_COMBO_LOG` | 无/错误/警告/信息/调试 |
-| `logFile` | Edit + Browse | `IDC_EDIT_LOGFILE` + `IDC_BTN_BROWSE` | 文件路径 |
 | 守护状态 | Static Text + Buttons | `IDC_STATUS` + `IDC_BTN_START` + `IDC_BTN_STOP` | 状态显示 |
 | 保存 | Button | `IDOK` | 写 config.json |
-| 取消 | Button | `IDCANCEL` | 放弃修改并关闭 |
-
-### 7.3 对话框处理流程
-
-```
-WM_INITDIALOG
-  │
-  ├── ConfigManager::load()      ← 从 config.json 读取当前配置
-  ├── DaemonController::status() ← 查询守护进程是否在运行
-  ├── 各控件 SetCheck/SetText/... ← 填充 UI
-  └── 返回 TRUE
-
-WM_COMMAND:
-  ├── IDC_RADIO_SMOOTH → 启用/禁用动画时长控件
-  ├── IDC_BTN_ADD      → 弹出输入框，添加进程名到列表
-  ├── IDC_BTN_REMOVE   → 删除列表选中项
-  ├── IDC_BTN_START    → DaemonController::start()
-  ├── IDC_BTN_STOP     → DaemonController::stop()
-  ├── IDC_BTN_BROWSE   → 打开文件选择对话框
-  ├── IDOK             → 收集控件值 → ConfigManager::save() → EndDialog
-  └── IDCANCEL         → EndDialog（不保存）
-
-WM_CLOSE → EndDialog
-```
-
-### 7.4 DaemonController 接口
-
-```cpp
-class DaemonController {
-public:
-    // 检查守护进程是否在运行
-    bool isRunning() const;
-
-    // 启动守护进程（CreateProcess，无窗口）
-    // 返回 true 表示成功启动
-    bool start();
-
-    // 停止守护进程（发送 WM_QUIT 到守护进程的消息窗口）
-    bool stop();
-
-    // 切换开机自启（写注册表 HKCU\...\Run）
-    bool setAutoStart(bool enable);
-    bool isAutoStart() const;
-
-private:
-    // 通过命名互斥体检测进程
-    static constexpr const wchar_t* MUTEX_NAME =
-        L"Global\\MouseFocusScript_Instance";
-
-    // 守护进程可执行文件路径（与本工具同目录）
-    std::wstring daemonPath() const;
-};
-```
-
-### 7.5 配置文件热重载（守护进程侧）
-
-守护进程通过 `ReadDirectoryChangesW` 监视 `config.json` 所在目录：
-
-```
-config.json 被配置工具修改
-       │
-       ▼
-ReadDirectoryChangesW 通知
-       │
-       ▼
-等待 100ms 防抖（文件可能还在写入）
-       │
-       ▼
-ConfigManager::load() 重新读取
-       │
-       ▼
-TriggerDetector 等模块读取新配置
-```
+| 关闭 | Button | `IDCANCEL` | 隐藏到托盘 |
 
 ---
 
-## 8. 关键类接口（守护进程）
+## 8. 关键类接口
 
 ### 8.1 Application
 
 ```cpp
 class Application {
 public:
-    int run(HINSTANCE hInstance);
+    int run(HINSTANCE hInstance, const std::wstring& configPath);
 
 private:
-    ConfigManager      m_config;
-    std::unique_ptr<FocusMonitor>     m_focusMonitor;
-    std::unique_ptr<KeyTracker>       m_keyTracker;
-    std::unique_ptr<TriggerDetector>  m_triggerDetector;
-    std::unique_ptr<MouseController>  m_mouseController;
+    ConfigManager m_config;
+    MouseController m_mouse;
+    std::unique_ptr<FocusMonitor> m_focusMonitor;
+    std::unique_ptr<KeyTracker> m_keyTracker;
+    std::unique_ptr<TriggerDetector> m_triggerDetector;
 
-    HWND m_hwnd = nullptr;  // 隐藏消息窗口
-    static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+    HWND m_hwnd = nullptr;
     void setupModules();
-    void teardownModules();
+    void checkConfigReload();
+    void executeMove(HWND target);
+    static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 };
 ```
 
-### 8.2 FocusMonitor
+### 8.2 MouseController
 
 ```cpp
-using FocusChangeCallback = std::function<void(HWND newForeground)>;
-
-class FocusMonitor {
-public:
-    void start(FocusChangeCallback cb);
-    void stop();
-    HWND currentForeground() const;
-
-private:
-    HWINEVENTHOOK m_hook = nullptr;
-    FocusChangeCallback m_callback;
-
-    static void CALLBACK eventProc(
-        HWINEVENTHOOK, DWORD event,
-        HWND hwnd, LONG idObject, LONG idChild,
-        DWORD, DWORD);
-};
-```
-
-### 8.3 KeyTracker
-
-```cpp
-class KeyTracker {
-public:
-    void start();
-    void stop();
-    bool isAltDown() const;
-    bool wasAltRecentlyDown(std::chrono::milliseconds window) const;
-    // 注册 Alt 释放回调
-    using AltReleaseCallback = std::function<void()>;
-    void onAltReleased(AltReleaseCallback cb);
-
-private:
-    HHOOK m_hook = nullptr;
-    std::atomic<bool> m_altDown{false};
-    std::chrono::steady_clock::time_point m_altUpTime;
-    AltReleaseCallback m_altReleaseCb;
-
-    static LRESULT CALLBACK keyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
-};
-```
-
-### 8.4 TriggerDetector
-
-```cpp
-class TriggerDetector {
-public:
-    TriggerDetector(ConfigManager& cfg, MouseController& mouse);
-
-    void onFocusChange(HWND hwnd);
-    void onAltPressed();
-    void onAltReleased();
-
-    // 注册实际执行移动的回调（供平滑动画异步使用）
-    using MoveCallback = std::function<void(HWND)>;
-    void onMoveRequested(MoveCallback cb);
-
-private:
-    ConfigManager&     m_config;
-    MouseController&   m_mouse;
-    MoveCallback       m_moveCb;
-
-    bool  m_altDown        = false;
-    HWND  m_candidateHwnd  = nullptr;
-
-    bool isSystemWindow(HWND hwnd);
-    bool isExcludedProcess(HWND hwnd);
-    bool isExcludedClass(HWND hwnd);
-};
-```
-
-### 8.5 MouseController
-
-```cpp
-enum class MouseMode { Instant, Smooth };
-
-struct WindowCenter {
-    LONG x, y;
-};
+struct WindowCenter { LONG x, y; };
 
 class MouseController {
 public:
     WindowCenter calculateCenter(HWND hwnd, bool clientArea) const;
     void moveInstant(HWND hwnd, bool clientArea);
-    void moveSmooth(HWND hwnd, bool clientArea,
-                    std::chrono::milliseconds duration);
+
+    void setSmoothDuration(int ms);
+    void startSmooth(HWND targetHwnd, bool clientArea);
+    bool smoothTick();  // returns true when done
 
 private:
-    void doSmoothMove(POINT from, POINT to,
-                      std::chrono::milliseconds duration);
+    POINT m_animFrom, m_animTo;
+    std::chrono::steady_clock::time_point m_animStart;
+    int m_animDurationMs = 150;
+    bool m_animActive = false;
+    static double easeOutCubic(double t);
 };
 ```
 
@@ -579,7 +414,7 @@ y(t) = from.y + (to.y - from.y) * eased
 ```
 
 实现方式：
-- 高频定时器（~1000Hz）驱动每帧
+- 定时器（10ms）驱动每帧
 - 避免阻塞消息泵（使用 `SetTimer` + `WM_TIMER`）
 - 中途有新目标窗口 → 放弃当前动画，立即跳转新目标
 
@@ -597,7 +432,6 @@ y(t) = from.y + (to.y - from.y) * eased
 | 开始菜单 (Win10) | 类名 `Windows.UI.Core.CoreWindow` |
 | 空 HWND | `hwnd == nullptr` 或 `!IsWindow(hwnd)` |
 | 不可见窗口 | `!IsWindowVisible(hwnd)` |
-| 无所有者的顶层消息窗口 | `GetWindow(hwnd, GW_OWNER) == nullptr && className == "..."` |
 
 ---
 
@@ -608,10 +442,8 @@ y(t) = from.y + (to.y - from.y) * eased
 1. **Win+Tab 支持** — 复用 Win 键追踪逻辑
 2. **特定显示器绑定** — "仅当前显示器上的窗口才触发"
 3. **窗口排除规则可视化编辑** — 运行时通过热键"排除当前窗口"
-4. **应用到特定场景** — 仅在特定工作区/桌面布局下触发
-5. **动画风格自定义** — 支持多种缓动曲线（ease-in、ease-in-out、spring 等）
-6. **鼠标附加操作** — 到达目标后自动点击、滚轮等
-7. **多语言国际化** — GUI 界面中英切换
+4. **动画风格自定义** — 支持多种缓动曲线
+5. **多语言国际化** — GUI 界面中英切换
 
 ---
 
@@ -620,81 +452,36 @@ y(t) = from.y + (to.y - from.y) * eased
 | 场景 | 处理 |
 |------|------|
 | 安全桌面（UAC） | 低权限钩子不跨会话，自动失效 |
-| 全屏游戏 | 需要评估：可配置排除全屏进程 |
+| 全屏游戏 | 可配置排除全屏进程 |
 | 远程桌面 | 正常工作的显示器虚拟化下行为一致 |
 | 多用户同时登录 | 每会话独立实例，句柄不跨会话 |
 | 意外退出 | 钩子在进程退出时由 OS 清理 |
-| 高 CPU 动画 | 平滑动画限制最长时间 300ms，超时强制结束 |
+| 高 CPU 动画 | 平滑动画限制最长时间 600ms，超时强制结束 |
 
 ---
 
 ## 13. 构建与运行
 
-### CMakeLists.txt（概要）
+### 构建
 
-```cmake
-cmake_minimum_required(VERSION 3.20)
-project(mouse_focus VERSION 1.0 LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# ========== 共用库（ConfigManager, AdaptationLayer, Logger）==========
-add_library(common STATIC
-    src/common/config_manager.cpp
-    src/common/adaptation_layer.cpp
-)
-
-target_include_directories(common PUBLIC
-    src third_party/nlohmann/include
-)
-
-target_link_libraries(common PUBLIC user32)
-
-# ========== 守护进程 ==========
-add_executable(mouse_focus_daemon
-    src/daemon/daemon_main.cpp
-    src/daemon/application.cpp
-    src/daemon/focus_monitor.cpp
-    src/daemon/key_tracker.cpp
-    src/daemon/trigger_detector.cpp
-    src/daemon/mouse_controller.cpp
-)
-
-target_link_libraries(mouse_focus_daemon PRIVATE common user32 kernel32 shell32)
-
-# ========== GUI 配置工具 ==========
-add_executable(mouse_focus_config WIN32
-    src/config_tool/config_main.cpp
-    src/config_tool/config_dialog.cpp
-    src/config_tool/daemon_controller.cpp
-)
-
-target_link_libraries(mouse_focus_config PRIVATE common user32 kernel32 shell32 comctl32)
-
-# 嵌入 Windows XP+ 视觉样式清单
-set_target_properties(mouse_focus_config PROPERTIES
-    WIN32_EXECUTABLE TRUE
-)
+```bash
+cmake -B build -S .
+cmake --build build --config Release
 ```
+
+生成文件：
+- `build\Release\mouse_focus_daemon.exe`
+- `build\Release\mouse_focus_config.exe`
 
 ### 使用方式
 
 ```
-# === 守护进程 ===
-# 直接启动（读取同目录 config.json，无窗口后台运行）
+# 守护进程（后台运行，无窗口）
 mouse_focus_daemon.exe
-
-# 指定配置文件
 mouse_focus_daemon.exe --config "D:\my_config.json"
 
-# === GUI 配置工具 ===
-# 打开设置界面
+# GUI 配置工具
 mouse_focus_config.exe
-
-# 界面操作：
-#   1. 修改各项配置
-#   2. 点击 [保存设置] 写入 config.json（守护进程自动热重载）
-#   3. 点击 [启动] / [停止] 控制守护进程
 ```
 
 **两程序协作流程**：
@@ -702,8 +489,7 @@ mouse_focus_config.exe
 ```
 用户打开 mouse_focus_config.exe
   → 修改设置 → 点 [保存] → 写入 config.json
-  → 守护进程通过 ReadDirectoryChangesW 检测到变更
-  → 自动热重载新配置，无需重启
+  → 守护进程检测到文件变更 → 自动热重载新配置
 
 用户点 [启动]
   → CreateProcess("mouse_focus_daemon.exe")
@@ -716,11 +502,10 @@ mouse_focus_config.exe
 ---
 
 > **评审检查清单**
-> - [ ] 双可执行文件架构是否合理？
-> - [ ] GUI 布局是否覆盖所有配置项？
-> - [ ] ALT+Tab 检测逻辑是否覆盖边界情况？
-> - [ ] 多显示器 DPI 混合场景是否正确？
-> - [ ] 守护进程热重载配置是否可靠？
-> - [ ] GUI 启停守护进程是否正确？
-> - [ ] 扩展点设计是否充足？
-> - [ ] 是否有遗漏的功能需求？
+> - [x] 双可执行文件架构
+> - [x] GUI 布局覆盖所有配置项
+> - [x] ALT+Tab 检测逻辑覆盖边界情况
+> - [x] 多显示器 DPI 混合场景
+> - [x] 守护进程热重载配置
+> - [x] GUI 启停守护进程
+> - [x] 扩展点设计

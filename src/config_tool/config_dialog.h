@@ -28,16 +28,10 @@ private:
     NOTIFYICONDATAW m_nid = {};
     HMENU m_trayMenu = nullptr;
 
-    HCURSOR m_hCurCurrent = nullptr;
-    HCURSOR m_hCurPreview = nullptr;
-
     void createTrayIcon();
     void updateTrayMenu();
     void removeTrayIcon();
     void showTrayMenu();
-    void updatePreviewCursor();
-    void updateHighlightControls(HWND hwnd);
-    void onRefreshHighlight(HWND hwnd);
 
     static INT_PTR CALLBACK dlgProc(HWND, UINT, WPARAM, LPARAM);
     void onInit(HWND hwnd);
@@ -47,8 +41,6 @@ private:
     void onToggleDaemon();
     void onAddExclude(HWND hwnd);
     void onRemoveExclude(HWND hwnd);
-    void onBrowseCustomCursor(HWND hwnd);
-    void onChooseColor(HWND hwnd);
     void collectValues(HWND hwnd);
     void refreshDaemonStatus(HWND hwnd);
 };

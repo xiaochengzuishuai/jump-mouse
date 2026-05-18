@@ -21,30 +21,12 @@
 #define IDC_EDIT_DELAY          1032
 #define IDC_SPIN_DELAY          1033
 
-// Highlight
-#define IDC_CHECK_HIGHLIGHT     1034
-#define IDC_EDIT_HIGHLIGHT_SIZE 1035
-#define IDC_SPIN_HIGHLIGHT_SIZE 1036
-
-// Highlight canvases
-#define IDC_CANVAS_CURRENT      1040
-#define IDC_CANVAS_PREVIEW      1041
-
-// Highlight shape & color
-#define IDC_COMBO_SHAPE         1050
-#define IDC_BTN_COLOR            1051
-#define IDC_BTN_BROWSE_CUR      1052
-// Toggle
-#define IDC_RADIO_CONFIG         1053
-#define IDC_RADIO_FILE           1054
-#define IDC_BTN_REFRESH           1055
-
 // Radio buttons — target area
-#define IDC_RADIO_WINDOW        1040
-#define IDC_RADIO_CLIENT        1041
+#define IDC_RADIO_WINDOW        1035
+#define IDC_RADIO_CLIENT        1036
 
 // Enabled
-#define IDC_CHECK_ENABLED       1050
+#define IDC_CHECK_ENABLED       1038
 
 // Exclude list
 #define IDC_LIST_EXCLUDE        1060

@@ -114,16 +114,6 @@ void Application::executeMove(HWND target) {
     bool clientArea = (cfg.targetArea == "client_rect");
     if (cfg.mouseMode == "instant") {
         m_mouse.moveInstant(target, clientArea);
-        // Highlight after instant move
-        if (cfg.highlightEnabled) {
-            m_mouse.enableHighlight(true);
-            m_mouse.setHighlightShape(cfg.highlightShape);
-            m_mouse.setHighlightColor(cfg.highlightColor);
-            m_mouse.setHighlightSize(cfg.highlightSize);
-            m_mouse.setHighlightCustomFile(cfg.highlightCustomFile);
-            if (m_mouse.applyHighlight())
-                SetTimer(m_hwnd, TIMER_HIGHLIGHT_POLL, 50, nullptr);
-        }
     } else {
         m_mouse.setSmoothDuration(cfg.smoothDurationMs);
         m_mouse.startSmooth(target, clientArea);
@@ -168,20 +158,7 @@ LRESULT CALLBACK Application::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM
     case WM_TIMER:
         if (wParam == TIMER_SMOOTH_MOVE) {
             bool done = g_application->m_mouse.smoothTick();
-            if (done) {
-                KillTimer(hwnd, TIMER_SMOOTH_MOVE);
-                // Apply highlight after smooth move completes
-                const auto& cfg = g_application->m_config.get();
-                if (cfg.highlightEnabled) {
-                    g_application->m_mouse.enableHighlight(true);
-                    g_application->m_mouse.setHighlightSize(cfg.highlightSize);
-                    if (g_application->m_mouse.applyHighlight())
-                        SetTimer(hwnd, TIMER_HIGHLIGHT_POLL, 50, nullptr);
-                }
-            }
-        } else if (wParam == TIMER_HIGHLIGHT_POLL) {
-            bool restored = g_application->m_mouse.pollHighlightRestore();
-            if (restored) KillTimer(hwnd, TIMER_HIGHLIGHT_POLL);
+            if (done) KillTimer(hwnd, TIMER_SMOOTH_MOVE);
         } else if (wParam == TIMER_DELAYED_MOVE) {
             KillTimer(hwnd, TIMER_DELAYED_MOVE);
             HWND target = g_application->m_delayedTarget;
@@ -191,12 +168,6 @@ LRESULT CALLBACK Application::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM
                 const auto& cfg = g_application->m_config.get();
                 if (cfg.mouseMode == "instant") {
                     g_application->m_mouse.moveInstant(target, clientArea);
-                    if (cfg.highlightEnabled) {
-                        g_application->m_mouse.enableHighlight(true);
-                        g_application->m_mouse.setHighlightSize(cfg.highlightSize);
-                        if (g_application->m_mouse.applyHighlight())
-                            SetTimer(hwnd, TIMER_HIGHLIGHT_POLL, 50, nullptr);
-                    }
                 } else {
                     g_application->m_mouse.setSmoothDuration(cfg.smoothDurationMs);
                     g_application->m_mouse.startSmooth(target, clientArea);

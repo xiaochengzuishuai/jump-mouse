@@ -11,7 +11,7 @@ IDI_APP_ICON ICON "../ico图标/1.ico"
 #define UDS_ALIGNRIGHT  0x0004
 #define UDS_ARROWKEYS   0x0020
 
-IDD_MAIN_DIALOG DIALOGEX 0, 0, 430, 550
+IDD_MAIN_DIALOG DIALOGEX 0, 0, 430, 500
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTROLPARENT
 CAPTION "Mouse Focus — 设置"
@@ -40,54 +40,26 @@ FONT 9, "Segoe UI"
     CONTROL         "启用服务", IDC_CHECK_ENABLED, "Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP, 22, 88, 80, 14
 
-    // ── 移动后临时变更 ──
-    GROUPBOX        "移动后临时变更", IDC_STATIC, 10, 126, 410, 152
-    CONTROL         "启用", IDC_CHECK_HIGHLIGHT, "Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP, 22, 142, 45, 14
+    GROUPBOX        "排除规则", IDC_STATIC, 10, 126, 410, 90
+    LTEXT           "进程名列表（如 devenv.exe）：", IDC_STATIC, 22, 142, 200, 12
+    LISTBOX         IDC_LIST_EXCLUDE, 22, 156, 280, 44, LBS_NOTIFY | WS_VSCROLL | WS_BORDER | WS_TABSTOP
+    PUSHBUTTON      "添加", IDC_BTN_ADD, 310, 156, 50, 15
+    PUSHBUTTON      "移除", IDC_BTN_REMOVE, 310, 176, 50, 15
 
-    LTEXT           "当前光标", IDC_STATIC, 22, 162, 68, 12
-    CONTROL         "", IDC_CANVAS_CURRENT, "Static", SS_BITMAP | WS_BORDER, 22, 176, 68, 68
-    LTEXT           "预览", IDC_STATIC, 108, 162, 68, 12
-    CONTROL         "", IDC_CANVAS_PREVIEW, "Static", SS_BITMAP | WS_BORDER, 108, 176, 68, 68
-
-    LTEXT           "形状", IDC_STATIC, 195, 170, 28, 12
-    COMBOBOX        IDC_COMBO_SHAPE, 225, 168, 95, 120, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "大小", IDC_STATIC, 330, 170, 28, 12
-    EDITTEXT        IDC_EDIT_HIGHLIGHT_SIZE, 358, 168, 40, 14, ES_NUMBER | WS_TABSTOP
-    CONTROL         "", IDC_SPIN_HIGHLIGHT_SIZE, "msctls_updown32",
-                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ALIGNRIGHT | UDS_ARROWKEYS, 0, 0, 0, 0
-
-    PUSHBUTTON      "颜色...", IDC_BTN_COLOR, 195, 192, 60, 14
-
-    CONTROL         "个性化配置", IDC_RADIO_CONFIG, "Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP, 195, 214, 80, 14
-    CONTROL         "导入文件", IDC_RADIO_FILE, "Button",
-                    BS_AUTORADIOBUTTON | WS_TABSTOP, 275, 214, 70, 14
-    PUSHBUTTON      "浏览...", IDC_BTN_BROWSE_CUR, 195, 232, 60, 14
-    PUSHBUTTON      "刷新", IDC_BTN_REFRESH, 340, 232, 45, 14
-
-    LTEXT           "检测到鼠标移动后自动恢复原始光标", IDC_STATIC, 22, 255, 300, 12
-
-    GROUPBOX        "排除规则", IDC_STATIC, 10, 286, 410, 90
-    LTEXT           "进程名列表（如 devenv.exe）：", IDC_STATIC, 22, 302, 200, 12
-    LISTBOX         IDC_LIST_EXCLUDE, 22, 316, 280, 44, LBS_NOTIFY | WS_VSCROLL | WS_BORDER | WS_TABSTOP
-    PUSHBUTTON      "添加", IDC_BTN_ADD, 310, 316, 50, 15
-    PUSHBUTTON      "移除", IDC_BTN_REMOVE, 310, 336, 50, 15
-
-    GROUPBOX        "守护进程状态", IDC_STATIC, 10, 384, 410, 50
-    LTEXT           "状态:", IDC_STATIC, 22, 404, 30, 12
-    LTEXT           "未知", IDC_STATUS, 55, 404, 100, 12
-    PUSHBUTTON      "启动", IDC_BTN_START, 180, 400, 50, 15
-    PUSHBUTTON      "停止", IDC_BTN_STOP, 238, 400, 50, 15
+    GROUPBOX        "守护进程状态", IDC_STATIC, 10, 224, 410, 50
+    LTEXT           "状态:", IDC_STATIC, 22, 244, 30, 12
+    LTEXT           "未知", IDC_STATUS, 55, 244, 100, 12
+    PUSHBUTTON      "启动", IDC_BTN_START, 180, 240, 50, 15
+    PUSHBUTTON      "停止", IDC_BTN_STOP, 238, 240, 50, 15
     CONTROL         "开机自启", IDC_CHECK_AUTOSTART, "Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP, 310, 402, 80, 14
+                    BS_AUTOCHECKBOX | WS_TABSTOP, 310, 242, 80, 14
 
-    GROUPBOX        "日志", IDC_STATIC, 10, 442, 410, 42
-    LTEXT           "日志级别:", IDC_STATIC, 22, 460, 50, 12
-    COMBOBOX        IDC_COMBO_LOG, 72, 458, 80, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "日志", IDC_STATIC, 10, 282, 410, 42
+    LTEXT           "日志级别:", IDC_STATIC, 22, 300, 50, 12
+    COMBOBOX        IDC_COMBO_LOG, 72, 298, 80, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 
-    DEFPUSHBUTTON   "保存设置", IDOK, 200, 510, 70, 22
-    PUSHBUTTON      "关闭", IDCANCEL, 280, 510, 70, 22
+    DEFPUSHBUTTON   "保存设置", IDOK, 200, 460, 70, 22
+    PUSHBUTTON      "关闭", IDCANCEL, 280, 460, 70, 22
 }
 
 IDD_INPUT_DIALOG DIALOGEX 0, 0, 280, 70
