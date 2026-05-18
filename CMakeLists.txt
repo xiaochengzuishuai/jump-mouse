@@ -4,6 +4,9 @@ project(mouse_focus VERSION 1.0 LANGUAGES CXX RC)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# MSVC: static CRT linkage (/MT) — no VC redist needed on target machine
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
 # MSVC: treat source files as UTF-8
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 # UNICODE is required for Windows API wide-char support
@@ -55,3 +58,19 @@ add_custom_command(TARGET mouse_focus_config POST_BUILD
 # Embedded via .rc files (dpi_aware.manifest). Disable MSVC auto-manifest.
 target_link_options(mouse_focus_daemon PRIVATE "/MANIFEST:NO")
 target_link_options(mouse_focus_config PRIVATE "/MANIFEST:NO")
+
+# ========== Release package: collect both exes + config ==========
+add_custom_target(release ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/release"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_FILE:mouse_focus_daemon>"
+        "${CMAKE_BINARY_DIR}/release/"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_FILE:mouse_focus_config>"
+        "${CMAKE_BINARY_DIR}/release/"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/config.json"
+        "${CMAKE_BINARY_DIR}/release/"
+    DEPENDS mouse_focus_daemon mouse_focus_config
+    COMMENT "Packaging release into build/release/"
+)

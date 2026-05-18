@@ -1,0 +1,71 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [master]
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: [x64]
+        config: [Release]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure CMake
+        run: cmake -B build -S . -A ${{ matrix.arch }}
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.config }} --parallel
+
+      - name: Package release
+        run: cmake --build build --config ${{ matrix.config }} --target release
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mouse-focus-v${{ github.ref_name }}-${{ matrix.arch }}
+          path: build/release/*
+
+  # Only create GitHub Release on tag push
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: mouse-focus-v${{ github.ref_name }}-x64
+          path: release/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "仅跳转 ${{ github.ref_name }}"
+          body: |
+            ## Mouse Focus — 仅跳转 ${{ github.ref_name }}
+
+            稳定版，纯 Alt+Tab 检测 + 鼠标自动跳转到窗口中心。
+
+            ### 包含文件
+            - `mouse_focus_daemon.exe` — 后台守护进程
+            - `mouse_focus_config.exe` — GUI 配置工具
+            - `config.json` — 默认配置
+
+            ### 运行方式
+            1. 将全部文件放到同一目录
+            2. 运行 `mouse_focus_config.exe` 打开配置界面
+            3. 点击「启动」开启守护进程
+            4. 使用 Alt+Tab 切换窗口，鼠标自动跟随
+
+            ### 系统要求
+            - Windows 10/11 64-bit
+            - 无需安装任何运行时（已静态链接）
+          files: release/*
+          draft: false
+          prerelease: false
