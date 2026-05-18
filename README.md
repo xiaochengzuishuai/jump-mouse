@@ -2,7 +2,7 @@
 
 **Alt+Tab 切换窗口时，鼠标自动跳转到新窗口中心。**
 
-[English](./docs/README_en.md)
+[English](./docs/English_Manual.md)
 
 ---
 
@@ -58,16 +58,16 @@ cmake --build build --config Release
 
 产物在 `build/release/` 目录。
 
-详细构建指南见：[BUILD_GUIDE.md](./docs/BUILD_GUIDE.md)
+详细构建指南见：[编译指南](./docs/编译指南.md)
 
 ## 文档
 
-- [设计文档](docs/DESIGN_DOC.md)
-- [编译指南](docs/BUILD_GUIDE.md)
-- [代码审查](docs/CODE_REVIEW.md)
-- [已知问题](docs/ISSUES.md)
-- [中文完整文档](docs/README_zh-CN.md)
-- [English Documentation](docs/README_en.md)
+- [设计文档](docs/设计文档.md)
+- [编译指南](docs/编译指南.md)
+- [代码审查](docs/代码审查.md)
+- [已知问题](docs/已知问题.md)
+- [中文完整文档](docs/中文完整文档.md)
+- [English Documentation](docs/English_Manual.md)
 
 ## 技术栈
 
