@@ -29,7 +29,7 @@ jobs:
         shell: pwsh
         run: |
           $tag = "${{ github.ref_name }}"
-          Compress-Archive -Path build/release/* -DestinationPath "JumpMouse-$tag-x64.zip"
+          Compress-Archive -Path build/release/* -DestinationPath "JumpMouse-$tag-Win10-Win11-x64.zip"
 
       - name: Upload zip
         uses: actions/upload-artifact@v4
